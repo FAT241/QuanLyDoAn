@@ -30,9 +30,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version> <!-- Đảm bảo khai báo phiên bản -->
         <configuration>
-          <source>9</source>
-          <target>9</target>
+          <release>9</release> <!-- Sử dụng release thay vì source và target -->
+          <compilerArgs>
+            <arg>-Xlint:deprecation</arg> <!-- Bật cảnh báo về API lỗi thời -->
+            <arg>-Xlint:unchecked</arg>  <!-- Bật cảnh báo về unchecked operations (tùy chọn) -->
+          </compilerArgs>
         </configuration>
       </plugin>
     </plugins>
