@@ -159,6 +159,28 @@ public class UserDAO {
         }
         return null;
     }
+    public User findByUsername(String username) throws SQLException {
+        String sql = "SELECT * FROM users WHERE username = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new User(
+                            rs.getInt("user_id"),
+                            rs.getString("username"),
+                            rs.getString("password"),
+                            rs.getString("email"),
+                            rs.getString("role"),
+                            rs.getString("full_name"),
+                            rs.getString("avatar_path"),
+                            rs.getString("student_code"),
+                            rs.getString("phone_number")
+                    );
+                }
+            }
+        }
+        return null;
+    }
 
     // Cập nhật thông tin
     public boolean updateUser(User user) throws SQLException {

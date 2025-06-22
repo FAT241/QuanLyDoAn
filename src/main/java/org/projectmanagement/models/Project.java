@@ -13,8 +13,9 @@ public class Project {
     private int studentId;
     private int teacherId;
     private String status;
-    private String studentName; // New field for student full name
-    private String teacherName; // New field for teacher full name
+    private String studentName;
+    private String teacherName;
+    private String comment; // Thêm trường comment
 
     // Constructor
     public Project(int projectId, String title, String description, Date ngayBatDau, Date ngayKetThuc,
@@ -55,4 +56,6 @@ public class Project {
     public void setStudentName(String studentName) { this.studentName = studentName; }
     public String getTeacherName() { return teacherName; }
     public void setTeacherName(String teacherName) { this.teacherName = teacherName; }
+    public String getComment() { return comment; }
+    public void setComment(String comment) { this.comment = comment; }
 }

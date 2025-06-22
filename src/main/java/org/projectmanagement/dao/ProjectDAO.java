@@ -4,18 +4,24 @@ import org.projectmanagement.models.Project;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ProjectDAO {
     private final Connection connection;
+    private static final List<String> VALID_STATUSES = Arrays.asList("CHO_DUYET", "DUYET", "TU_CHOI", "DA_NOP");
 
     public ProjectDAO(Connection connection) {
         this.connection = connection;
     }
 
     public boolean addProject(Project project) throws SQLException {
-        String sql = "INSERT INTO projects (title, description, ngay_bat_dau, ngay_ket_thuc, ngay_nop, status, tep_bao_cao, student_id, teacher_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        if (!VALID_STATUSES.contains(project.getStatus())) {
+            throw new SQLException("Trạng thái không hợp lệ: " + project.getStatus());
+        }
+
+        String sql = "INSERT INTO projects (title, description, ngay_bat_dau, ngay_ket_thuc, ngay_nop, status, tep_bao_cao, student_id, teacher_id, comment) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, project.getTitle());
             stmt.setString(2, project.getDescription());
@@ -30,6 +36,7 @@ public class ProjectDAO {
             stmt.setString(7, project.getTepBaoCao());
             stmt.setInt(8, project.getStudentId());
             stmt.setInt(9, project.getTeacherId());
+            stmt.setString(10, project.getComment()); // Thêm comment
             return stmt.executeUpdate() > 0;
         }
     }
@@ -52,7 +59,17 @@ public class ProjectDAO {
     }
 
     public boolean updateProject(Project project) throws SQLException {
-        String sql = "UPDATE projects SET title=?, description=?, ngay_bat_dau=?, ngay_ket_thuc=?, ngay_nop=?, status=?, tep_bao_cao=?, student_id=?, teacher_id=? " +
+        if (!VALID_STATUSES.contains(project.getStatus())) {
+            throw new SQLException("Trạng thái không hợp lệ: " + project.getStatus());
+        }
+
+        Project existingProject = findById(project.getProjectId());
+        if (existingProject != null && existingProject.getStatus().equals("CHO_DUYET") &&
+                (project.getStatus().equals("DUYET") || project.getStatus().equals("TU_CHOI"))) {
+            // Giả định logic kiểm tra quyền admin được thực hiện ở tầng giao diện
+        }
+
+        String sql = "UPDATE projects SET title=?, description=?, ngay_bat_dau=?, ngay_ket_thuc=?, ngay_nop=?, status=?, tep_bao_cao=?, student_id=?, teacher_id=?, comment=? " +
                 "WHERE project_id=?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, project.getTitle());
@@ -68,7 +85,8 @@ public class ProjectDAO {
             stmt.setString(7, project.getTepBaoCao());
             stmt.setInt(8, project.getStudentId());
             stmt.setInt(9, project.getTeacherId());
-            stmt.setInt(10, project.getProjectId());
+            stmt.setString(10, project.getComment()); // Thêm comment
+            stmt.setInt(11, project.getProjectId());
             return stmt.executeUpdate() > 0;
         }
     }
@@ -91,6 +109,24 @@ public class ProjectDAO {
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 projects.add(extractProjectFromResultSet(rs));
+            }
+        }
+        return projects;
+    }
+
+    public List<Project> getProjectsByStudentId(int studentId) throws SQLException {
+        List<Project> projects = new ArrayList<>();
+        String sql = "SELECT p.*, s.full_name AS student_name, t.full_name AS teacher_name " +
+                "FROM projects p " +
+                "LEFT JOIN students s ON p.student_id = s.student_id " +
+                "LEFT JOIN teachers t ON p.teacher_id = t.teacher_id " +
+                "WHERE p.student_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, studentId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    projects.add(extractProjectFromResultSet(rs));
+                }
             }
         }
         return projects;
@@ -146,6 +182,7 @@ public class ProjectDAO {
         project.setStatus(rs.getString("status"));
         project.setStudentName(rs.getString("student_name"));
         project.setTeacherName(rs.getString("teacher_name"));
+        project.setComment(rs.getString("comment")); // Thêm comment
         return project;
     }
 

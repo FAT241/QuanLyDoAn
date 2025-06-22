@@ -23,6 +23,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -180,6 +181,13 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             buttonPanel.add(btnAdd);
             buttonPanel.add(btnEdit);
             buttonPanel.add(btnDelete);
+        } else if ("teacher".equals(loggedUser.getRole())) {
+            btnEdit = new JButton("Sửa đồ án");
+            btnEdit.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            btnEdit.setBackground(new Color(0, 123, 255));
+            btnEdit.setForeground(Color.WHITE);
+            btnEdit.addActionListener(e -> showEditProjectDialog());
+            buttonPanel.add(btnEdit);
         }
         add(buttonPanel, BorderLayout.SOUTH);
     }
@@ -190,7 +198,6 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             isSocketConnected = true;
             statusLabel.setText("🟢 Kết nối");
             statusLabel.setForeground(Color.GREEN);
-            showNotification("Kết nối thành công với server", "success");
         });
     }
 
@@ -265,7 +272,39 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             @Override
             protected List<Project> doInBackground() throws SQLException {
                 synchronized (projectDAO) {
-                    return projectDAO.findAll();
+                    List<Project> projects = projectDAO.findAll();
+                    if ("user".equals(loggedUser.getRole())) {
+                        StudentDAO studentDAO = new StudentDAO(connection);
+                        List<Student> students = studentDAO.findAll();
+                        Student currentStudent = students.stream()
+                                .filter(s -> s.getUserId() == loggedUser.getUserId())
+                                .findFirst()
+                                .orElse(null);
+                        if (currentStudent != null) {
+                            final int studentId = currentStudent.getStudentId();
+                            projects = projects.stream()
+                                    .filter(p -> p.getStudentId() == studentId)
+                                    .collect(Collectors.toList());
+                        } else {
+                            projects = new ArrayList<>();
+                        }
+                    } else if ("teacher".equals(loggedUser.getRole())) {
+                        TeacherDAO teacherDAO = new TeacherDAO(connection);
+                        List<Teacher> teachers = teacherDAO.findAll();
+                        Teacher currentTeacher = teachers.stream()
+                                .filter(t -> t.getEmail().equals(loggedUser.getEmail()))
+                                .findFirst()
+                                .orElse(null);
+                        if (currentTeacher != null) {
+                            final int teacherId = currentTeacher.getTeacherId();
+                            projects = projects.stream()
+                                    .filter(p -> p.getTeacherId() == teacherId)
+                                    .collect(Collectors.toList());
+                        } else {
+                            projects = new ArrayList<>();
+                        }
+                    }
+                    return projects;
                 }
             }
 
@@ -273,11 +312,6 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             protected void done() {
                 try {
                     List<Project> projects = get();
-                    if ("user".equals(loggedUser.getRole())) {
-                        projects = projects.stream()
-                                .filter(p -> p.getStudentId() == loggedUser.getUserId())
-                                .collect(Collectors.toList());
-                    }
                     updateTable(projects);
                 } catch (InterruptedException | ExecutionException e) {
                     JOptionPane.showMessageDialog(ProjectsPanel.this,
@@ -300,7 +334,39 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             @Override
             protected List<Project> doInBackground() throws Exception {
                 synchronized (projectDAO) {
-                    return projectDAO.searchByTitleOrStudentId(keyword);
+                    List<Project> projects = projectDAO.searchByTitleOrStudentId(keyword);
+                    if ("user".equals(loggedUser.getRole())) {
+                        StudentDAO studentDAO = new StudentDAO(connection);
+                        List<Student> students = studentDAO.findAll();
+                        Student currentStudent = students.stream()
+                                .filter(s -> s.getUserId() == loggedUser.getUserId())
+                                .findFirst()
+                                .orElse(null);
+                        if (currentStudent != null) {
+                            final int studentId = currentStudent.getStudentId();
+                            projects = projects.stream()
+                                    .filter(p -> p.getStudentId() == studentId)
+                                    .collect(Collectors.toList());
+                        } else {
+                            projects = new ArrayList<>();
+                        }
+                    } else if ("teacher".equals(loggedUser.getRole())) {
+                        TeacherDAO teacherDAO = new TeacherDAO(connection);
+                        List<Teacher> teachers = teacherDAO.findAll();
+                        Teacher currentTeacher = teachers.stream()
+                                .filter(t -> t.getEmail().equals(loggedUser.getEmail()))
+                                .findFirst()
+                                .orElse(null);
+                        if (currentTeacher != null) {
+                            final int teacherId = currentTeacher.getTeacherId();
+                            projects = projects.stream()
+                                    .filter(p -> p.getTeacherId() == teacherId)
+                                    .collect(Collectors.toList());
+                        } else {
+                            projects = new ArrayList<>();
+                        }
+                    }
+                    return projects;
                 }
             }
 
@@ -308,11 +374,6 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             protected void done() {
                 try {
                     List<Project> projects = get();
-                    if ("user".equals(loggedUser.getRole())) {
-                        projects = projects.stream()
-                                .filter(p -> p.getStudentId() == loggedUser.getUserId())
-                                .collect(Collectors.toList());
-                    }
                     updateTable(projects);
                     if (projects.isEmpty()) {
                         JOptionPane.showMessageDialog(ProjectsPanel.this,
@@ -329,8 +390,8 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
 
     private void updateTable(List<Project> projects) {
         String[] columns = {"ID", "Tiêu đề", "Mô tả", "Ngày bắt đầu", "Ngày kết thúc",
-                "Ngày nộp", "Trạng thái", "File báo cáo", "Sinh viên", "Giảng viên", "Hành động"};
-        Object[][] data = new Object[projects.size()][11];
+                "Ngày nộp", "Trạng thái", "File báo cáo", "Sinh viên", "Giảng viên", "Nhận xét", "Hành động"};
+        Object[][] data = new Object[projects.size()][12];
 
         for (int i = 0; i < projects.size(); i++) {
             Project p = projects.get(i);
@@ -349,6 +410,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                     p.getTepBaoCao(),
                     p.getStudentName() != null ? p.getStudentName() : "N/A",
                     p.getTeacherName() != null ? p.getTeacherName() : "N/A",
+                    p.getComment() != null ? p.getComment() : "Chưa có nhận xét",
                     btnDownload
             };
         }
@@ -356,18 +418,19 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
         DefaultTableModel model = new DefaultTableModel(data, columns) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 10;
+                return column == 11;
             }
 
             @Override
             public Class<?> getColumnClass(int columnIndex) {
-                return columnIndex == 10 ? JButton.class : Object.class;
+                return columnIndex == 11 ? JButton.class : Object.class;
             }
         };
 
         projectTable.setModel(model);
-        projectTable.getColumnModel().getColumn(10).setCellRenderer(new ButtonRenderer());
-        projectTable.getColumnModel().getColumn(10).setCellEditor(new ButtonEditor(new JCheckBox()));
+        projectTable.getColumnModel().getColumn(11).setCellRenderer(new ButtonRenderer());
+        projectTable.getColumnModel().getColumn(11).setCellEditor(new ButtonEditor(new JCheckBox()));
+        projectTable.getColumnModel().getColumn(10).setPreferredWidth(200); // Tăng chiều rộng cột Nhận xét
     }
 
     private void downloadFileViaSocket(String filePath) {
@@ -505,6 +568,10 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                     "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
 
+        JLabel lblStatus = new JLabel("Trạng thái:");
+        JTextField txtStatus = new JTextField("CHO_DUYET", 30);
+        txtStatus.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtStatus.setEditable(false);
         JComboBox<String> cbStatus = new JComboBox<>(new String[]{"CHO_DUYET", "DUYET", "TU_CHOI", "DA_NOP"});
         cbStatus.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         cbStatus.setSelectedItem("CHO_DUYET");
@@ -581,10 +648,14 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
         gbc.gridx = 0;
         gbc.gridy = 7;
         gbc.weightx = 0.0;
-        dialog.add(new JLabel("Trạng thái:"), gbc);
+        dialog.add(lblStatus, gbc);
         gbc.gridx = 1;
         gbc.weightx = 1.0;
-        dialog.add(cbStatus, gbc);
+        if ("admin".equals(loggedUser.getRole())) {
+            dialog.add(cbStatus, gbc);
+        } else {
+            dialog.add(txtStatus, gbc);
+        }
 
         gbc.gridx = 1;
         gbc.gridy = 8;
@@ -649,9 +720,10 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
 
                 String sourceFilePath = txtReportFile.getText().trim();
 
-                // Tạo project mới với đầy đủ 9 tham số
+                // Tạo project mới với trạng thái mặc định là CHO_DUYET cho học sinh
                 Project project = new Project(0, title, description, startDate, endDate, null, sourceFilePath.isEmpty() ? null : sourceFilePath, studentId, teacherId);
-                project.setStatus((String) cbStatus.getSelectedItem());
+                String status = "admin".equals(loggedUser.getRole()) ? (String) cbStatus.getSelectedItem() : "CHO_DUYET";
+                project.setStatus(status);
 
                 // Lưu project vào database trước
                 boolean success;
@@ -659,7 +731,6 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                 synchronized (projectDAO) {
                     success = projectDAO.addProject(project);
                     if (success) {
-                        // Tìm project vừa thêm để lấy project_id
                         List<Project> projects = projectDAO.searchByTitleOrStudentId(title);
                         Project addedProject = projects.stream()
                                 .filter(p -> p.getTitle().equals(title) && p.getStudentId() == studentId)
@@ -684,14 +755,12 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                         return;
                     }
 
-                    // Vô hiệu hóa nút Save để tránh click nhiều lần
                     btnSave.setEnabled(false);
                     btnSave.setText("Đang xử lý...");
 
                     if (checkSocketConnection()) {
                         uploadFileViaSocket(newProjectId, sourceFilePath, dialog, project, btnSave);
                     } else {
-                        // Fallback to regular file upload
                         UIFileHandler.uploadFileWithProgress(dialog, sourceFilePath, result -> {
                             SwingUtilities.invokeLater(() -> {
                                 if (result.isSuccess()) {
@@ -710,14 +779,12 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                                 } else {
                                     showNotification("Lỗi tải lên file: Upload failed", "error");
                                 }
-                                // Khôi phục nút Save
                                 btnSave.setEnabled(true);
                                 btnSave.setText("Lưu");
                             });
                         });
                     }
                 } else {
-                    // Không có file để tải lên
                     loadProjectsAsync();
                     dialog.dispose();
                     showNotification("Thêm đồ án thành công!", "success");
@@ -737,7 +804,6 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
     }
 
     private void uploadFileViaSocket(int projectId, String filePath, JDialog parentDialog, Project project, JButton btnSave) {
-        // Kiểm tra file tồn tại trước khi upload
         File file = new File(filePath);
         if (!file.exists() || !file.isFile()) {
             showNotification("File không tồn tại: " + filePath, "error");
@@ -756,19 +822,16 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
         progressDialog.setSize(300, 100);
         progressDialog.setLocationRelativeTo(parentDialog);
 
-        // Tạo SwingWorker để xử lý upload không đồng bộ
         SwingWorker<Void, Integer> uploadWorker = new SwingWorker<Void, Integer>() {
             @Override
             protected Void doInBackground() throws Exception {
                 try {
-                    // Kiểm tra kết nối socket
                     if (!isSocketConnected || socketClient == null) {
                         throw new Exception("Không có kết nối socket");
                     }
 
-                    // Thực hiện upload với callback progress
                     socketClient.uploadFile(filePath, projectId, progress -> {
-                        publish(progress); // Publish progress để cập nhật UI
+                        publish(progress);
                     }).thenAccept(result -> {
                         SwingUtilities.invokeLater(() -> {
                             progressDialog.dispose();
@@ -778,26 +841,19 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                                     if (uploadedFilePath == null || uploadedFilePath.isEmpty()) {
                                         throw new SQLException("Đường dẫn file tải lên không hợp lệ: " + uploadedFilePath);
                                     }
-                                    System.out.println("Đường dẫn file tải lên: " + uploadedFilePath); // Debug log
                                     project.setTepBaoCao(uploadedFilePath);
                                     project.setNgayNop(new Date());
                                     synchronized (projectDAO) {
-                                        boolean updateSuccess = projectDAO.updateProject(project);
-                                        System.out.println("Cập nhật database: " + (updateSuccess ? "Thành công" : "Thất bại")); // Debug log
-                                        if (!updateSuccess) {
-                                            throw new SQLException("Cập nhật đường dẫn file vào database thất bại.");
-                                        }
+                                        projectDAO.updateProject(project);
                                     }
                                     loadProjectsAsync();
                                     showNotification("Tải lên file và thêm đồ án thành công!", "success");
                                     parentDialog.dispose();
                                 } catch (SQLException ex) {
                                     showNotification("Lỗi cập nhật database: " + ex.getMessage(), "error");
-                                    System.err.println("Lỗi SQL khi cập nhật project: " + ex.getMessage()); // Debug log
                                 }
                             } else {
                                 showNotification("Lỗi tải lên file: " + (result.getMessage() != null ? result.getMessage() : "Upload failed"), "error");
-                                System.err.println("Upload thất bại: " + result.getMessage()); // Debug log
                             }
                             btnSave.setEnabled(true);
                             btnSave.setText("Lưu");
@@ -806,7 +862,6 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                         SwingUtilities.invokeLater(() -> {
                             progressDialog.dispose();
                             showNotification("Lỗi khi tải lên: " + throwable.getMessage(), "error");
-                            System.err.println("Lỗi upload exception: " + throwable.getMessage()); // Debug log
                             btnSave.setEnabled(true);
                             btnSave.setText("Lưu");
                         });
@@ -821,7 +876,6 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
 
             @Override
             protected void process(List<Integer> chunks) {
-                // Cập nhật progress bar với giá trị mới nhất
                 if (!chunks.isEmpty()) {
                     int latestProgress = chunks.get(chunks.size() - 1);
                     progressBar.setValue(latestProgress);
@@ -832,7 +886,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             @Override
             protected void done() {
                 try {
-                    get(); // Kiểm tra exception
+                    get();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     SwingUtilities.invokeLater(() -> {
@@ -852,12 +906,10 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             }
         };
 
-        // Hiển thị dialog trước khi bắt đầu upload
         SwingUtilities.invokeLater(() -> {
             progressDialog.setVisible(true);
         });
 
-        // Bắt đầu tải lên
         uploadWorker.execute();
     }
 
@@ -874,7 +926,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             Project project = projectDAO.findById(projectId);
             JDialog dialog = new JDialog();
             dialog.setTitle("Sửa đồ án");
-            dialog.setSize(600, 500);
+            dialog.setSize(600, 600); // Tăng chiều cao để chứa nhận xét
             dialog.setLocationRelativeTo(this);
             dialog.setLayout(new GridBagLayout());
             dialog.setBackground(Color.WHITE);
@@ -899,6 +951,12 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             JTextField txtReportFile = new JTextField(project.getTepBaoCao() != null ? project.getTepBaoCao() : "", 20);
             txtReportFile.setFont(new Font("Segoe UI", Font.PLAIN, 14));
             txtReportFile.setEditable(false);
+
+            JTextArea txtComment = new JTextArea(project.getComment() != null ? project.getComment() : "", 4, 30);
+            txtComment.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            txtComment.setLineWrap(true);
+            txtComment.setWrapStyleWord(true);
+            JScrollPane scrollComment = new JScrollPane(txtComment);
 
             JComboBox<String> cbStudentComboBox = new JComboBox<>();
             cbStudentComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -928,6 +986,9 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                         "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
 
+            JTextField txtStatus = new JTextField(project.getStatus(), 30);
+            txtStatus.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            txtStatus.setEditable(false);
             JComboBox<String> cbStatusComboBox = new JComboBox<>(new String[]{"CHO_DUYET", "DUYET", "TU_CHOI", "DA_NOP"});
             cbStatusComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
             cbStatusComboBox.setSelectedItem(project.getStatus());
@@ -940,6 +1001,37 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             btnSaveButton.setFont(new Font("Segoe UI", Font.PLAIN, 14));
             btnSaveButton.setBackground(new Color(0, 123, 255));
             btnSaveButton.setForeground(Color.WHITE);
+
+            // Hạn chế chỉnh sửa dựa trên vai trò
+            if ("user".equals(loggedUser.getRole())) {
+                txtTitle.setEnabled(false);
+                txtDescription.setEnabled(false);
+                txtStartDate.setEnabled(false);
+                txtEndDate.setEnabled(false);
+                txtReportFile.setEnabled(false);
+                btnChooseFile.setEnabled(false);
+                cbStudentComboBox.setEnabled(false);
+                cbTeacherComboBox.setEnabled(false);
+                txtStatus.setEnabled(false);
+                cbStatusComboBox.setEnabled(false);
+                txtComment.setEnabled(false);
+                JOptionPane.showMessageDialog(this, "Bạn không có quyền chỉnh sửa đồ án.", "Lỗi", JOptionPane.WARNING_MESSAGE);
+                dialog.dispose();
+                return;
+            } else if ("teacher".equals(loggedUser.getRole())) {
+                txtTitle.setEnabled(false);
+                txtDescription.setEnabled(false);
+                txtStartDate.setEnabled(false);
+                txtEndDate.setEnabled(false);
+                txtReportFile.setEnabled(false);
+                btnChooseFile.setEnabled(false);
+                cbStudentComboBox.setEnabled(false);
+                cbTeacherComboBox.setEnabled(false);
+                cbStatusComboBox.setEnabled(true);
+                txtComment.setEnabled(true);
+            } else if ("admin".equals(loggedUser.getRole())) {
+                txtComment.setEnabled(false); // Admin chỉ xem nhận xét
+            }
 
             gbc.gridx = 0;
             gbc.gridy = 0;
@@ -1006,10 +1098,22 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             dialog.add(new JLabel("Trạng thái:"), gbc);
             gbc.gridx = 1;
             gbc.weightx = 1.0;
-            dialog.add(cbStatusComboBox, gbc);
+            if ("admin".equals(loggedUser.getRole()) || "teacher".equals(loggedUser.getRole())) {
+                dialog.add(cbStatusComboBox, gbc);
+            } else {
+                dialog.add(txtStatus, gbc);
+            }
+
+            gbc.gridx = 0;
+            gbc.gridy = 8;
+            gbc.weightx = 0.0;
+            dialog.add(new JLabel("Nhận xét:"), gbc);
+            gbc.gridx = 1;
+            gbc.weightx = 1.0;
+            dialog.add(scrollComment, gbc);
 
             gbc.gridx = 1;
-            gbc.gridy = 8;
+            gbc.gridy = 9;
             gbc.weightx = 0.0;
             gbc.anchor = GridBagConstraints.CENTER;
             dialog.add(btnSaveButton, gbc);
@@ -1039,6 +1143,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                     int teacherId = Integer.parseInt(teacherSelection.substring(teacherSelection.lastIndexOf(": ") + 2, teacherSelection.lastIndexOf(")")));
 
                     String sourceFilePath = txtReportFile.getText().trim();
+                    String comment = txtComment.getText().trim();
 
                     project.setTitle(txtTitle.getText().trim());
                     project.setDescription(txtDescription.getText().trim());
@@ -1046,7 +1151,12 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                     project.setNgayKetThuc(endDate);
                     project.setStudentId(studentId);
                     project.setTeacherId(teacherId);
-                    project.setStatus((String) cbStatusComboBox.getSelectedItem());
+                    project.setComment(comment.isEmpty() ? null : comment); // Lưu nhận xét
+                    if ("admin".equals(loggedUser.getRole()) || "teacher".equals(loggedUser.getRole())) {
+                        project.setStatus((String) cbStatusComboBox.getSelectedItem());
+                    } else {
+                        project.setStatus(project.getStatus()); // Giữ nguyên trạng thái
+                    }
 
                     if (!sourceFilePath.equals(project.getTepBaoCao()) && !sourceFilePath.isEmpty()) {
                         if (checkSocketConnection()) {
@@ -1188,7 +1298,6 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                 if (fileChooser.showSaveDialog(button) == JFileChooser.APPROVE_OPTION) {
                     String destFilePath = fileChooser.getSelectedFile().getAbsolutePath();
                     UIFileHandler.downloadFileWithProgress(button, filePath, destFilePath, () -> {
-                        // Optional: Additional actions after download completes
                     });
                 }
             }
