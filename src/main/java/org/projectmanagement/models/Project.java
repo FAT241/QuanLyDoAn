@@ -1,6 +1,8 @@
 package org.projectmanagement.models;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Project {
     private int projectId;
@@ -9,26 +11,27 @@ public class Project {
     private Date ngayBatDau;
     private Date ngayKetThuc;
     private Date ngayNop;
-    private String tepBaoCao;
+    private String status;
     private int studentId;
     private int teacherId;
-    private String status;
     private String studentName;
     private String teacherName;
-    private String comment; // Thêm trường comment
+    private List<String> filePaths;
+    private List<String> comments;
 
-    // Constructor
-    public Project(int projectId, String title, String description, Date ngayBatDau, Date ngayKetThuc,
-                   Date ngayNop, String tepBaoCao, int studentId, int teacherId) {
+    public Project(int projectId, String title, String description, Date ngayBatDau, Date ngayKetThuc, Date ngayNop,
+                   List<String> filePaths, List<String> comments, int studentId, int teacherId) {
         this.projectId = projectId;
         this.title = title;
         this.description = description;
         this.ngayBatDau = ngayBatDau;
         this.ngayKetThuc = ngayKetThuc;
         this.ngayNop = ngayNop;
-        this.tepBaoCao = tepBaoCao;
+        this.status = "CHO_DUYET";
         this.studentId = studentId;
         this.teacherId = teacherId;
+        this.filePaths = filePaths != null ? new ArrayList<>(filePaths) : new ArrayList<>();
+        this.comments = comments != null ? new ArrayList<>(comments) : new ArrayList<>();
     }
 
     // Getters and Setters
@@ -44,18 +47,26 @@ public class Project {
     public void setNgayKetThuc(Date ngayKetThuc) { this.ngayKetThuc = ngayKetThuc; }
     public Date getNgayNop() { return ngayNop; }
     public void setNgayNop(Date ngayNop) { this.ngayNop = ngayNop; }
-    public String getTepBaoCao() { return tepBaoCao; }
-    public void setTepBaoCao(String tepBaoCao) { this.tepBaoCao = tepBaoCao; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
     public int getStudentId() { return studentId; }
     public void setStudentId(int studentId) { this.studentId = studentId; }
     public int getTeacherId() { return teacherId; }
     public void setTeacherId(int teacherId) { this.teacherId = teacherId; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
     public String getStudentName() { return studentName; }
     public void setStudentName(String studentName) { this.studentName = studentName; }
     public String getTeacherName() { return teacherName; }
     public void setTeacherName(String teacherName) { this.teacherName = teacherName; }
-    public String getComment() { return comment; }
-    public void setComment(String comment) { this.comment = comment; }
+    public List<String> getFilePaths() { return new ArrayList<>(filePaths); }
+    public void setFilePaths(List<String> filePaths) { this.filePaths = new ArrayList<>(filePaths); }
+    public List<String> getComments() { return new ArrayList<>(comments); }
+    public void setComments(List<String> comments) { this.comments = new ArrayList<>(comments); }
+
+    public String getLatestFilePath() {
+        return filePaths.isEmpty() ? null : filePaths.get(filePaths.size() - 1);
+    }
+
+    public String getLatestComment() {
+        return comments.isEmpty() ? null : comments.get(comments.size() - 1);
+    }
 }

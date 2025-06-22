@@ -396,8 +396,8 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
         for (int i = 0; i < projects.size(); i++) {
             Project p = projects.get(i);
             JButton btnDownload = new JButton("Tải xuống");
-            btnDownload.setEnabled(p.getTepBaoCao() != null && !p.getTepBaoCao().isEmpty());
-            btnDownload.addActionListener(e -> downloadFileViaSocket(p.getTepBaoCao()));
+            btnDownload.setEnabled(p.getLatestFilePath() != null && !p.getLatestFilePath().isEmpty());
+            btnDownload.addActionListener(e -> downloadFileViaSocket(p.getLatestFilePath()));
 
             data[i] = new Object[]{
                     p.getProjectId(),
@@ -407,10 +407,10 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                     p.getNgayKetThuc() != null ? DATE_FORMAT.format(p.getNgayKetThuc()) : "Chưa đặt",
                     p.getNgayNop() != null ? DATE_FORMAT.format(p.getNgayNop()) : "Chưa nộp",
                     p.getStatus(),
-                    p.getTepBaoCao(),
+                    p.getLatestFilePath(),
                     p.getStudentName() != null ? p.getStudentName() : "N/A",
                     p.getTeacherName() != null ? p.getTeacherName() : "N/A",
-                    p.getComment() != null ? p.getComment() : "Chưa có nhận xét",
+                    p.getLatestComment() != null ? p.getLatestComment() : "Chưa có nhận xét",
                     btnDownload
             };
         }
@@ -721,7 +721,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                 String sourceFilePath = txtReportFile.getText().trim();
 
                 // Tạo project mới với trạng thái mặc định là CHO_DUYET cho học sinh
-                Project project = new Project(0, title, description, startDate, endDate, null, sourceFilePath.isEmpty() ? null : sourceFilePath, studentId, teacherId);
+                Project project = new Project(0, title, description, startDate, endDate, null, new ArrayList<>(), new ArrayList<>(), studentId, teacherId);
                 String status = "admin".equals(loggedUser.getRole()) ? (String) cbStatus.getSelectedItem() : "CHO_DUYET";
                 project.setStatus(status);
 
@@ -765,9 +765,10 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                             SwingUtilities.invokeLater(() -> {
                                 if (result.isSuccess()) {
                                     try {
-                                        project.setTepBaoCao(result.getFilePath());
-                                        project.setNgayNop(new Date());
+                                        project.getFilePaths().add(result.getFilePath());
                                         synchronized (projectDAO) {
+                                            projectDAO.addFile(newProjectId, result.getFilePath());
+                                            project.setNgayNop(new Date());
                                             projectDAO.updateProject(project);
                                         }
                                         loadProjectsAsync();
@@ -841,9 +842,10 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                                     if (uploadedFilePath == null || uploadedFilePath.isEmpty()) {
                                         throw new SQLException("Đường dẫn file tải lên không hợp lệ: " + uploadedFilePath);
                                     }
-                                    project.setTepBaoCao(uploadedFilePath);
-                                    project.setNgayNop(new Date());
+                                    project.getFilePaths().add(uploadedFilePath);
                                     synchronized (projectDAO) {
+                                        projectDAO.addFile(projectId, uploadedFilePath);
+                                        project.setNgayNop(new Date());
                                         projectDAO.updateProject(project);
                                     }
                                     loadProjectsAsync();
@@ -926,7 +928,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             Project project = projectDAO.findById(projectId);
             JDialog dialog = new JDialog();
             dialog.setTitle("Sửa đồ án");
-            dialog.setSize(600, 600); // Tăng chiều cao để chứa nhận xét
+            dialog.setSize(600, 600);
             dialog.setLocationRelativeTo(this);
             dialog.setLayout(new GridBagLayout());
             dialog.setBackground(Color.WHITE);
@@ -948,11 +950,11 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             txtStartDate.setFont(new Font("Segoe UI", Font.PLAIN, 14));
             JTextField txtEndDate = new JTextField(project.getNgayKetThuc() != null ? DATE_FORMAT.format(project.getNgayKetThuc()) : "", 30);
             txtEndDate.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            JTextField txtReportFile = new JTextField(project.getTepBaoCao() != null ? project.getTepBaoCao() : "", 20);
+            JTextField txtReportFile = new JTextField(project.getLatestFilePath() != null ? project.getLatestFilePath() : "", 20);
             txtReportFile.setFont(new Font("Segoe UI", Font.PLAIN, 14));
             txtReportFile.setEditable(false);
 
-            JTextArea txtComment = new JTextArea(project.getComment() != null ? project.getComment() : "", 4, 30);
+            JTextArea txtComment = new JTextArea(project.getLatestComment() != null ? project.getLatestComment() : "", 4, 30);
             txtComment.setFont(new Font("Segoe UI", Font.PLAIN, 14));
             txtComment.setLineWrap(true);
             txtComment.setWrapStyleWord(true);
@@ -1151,23 +1153,30 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                     project.setNgayKetThuc(endDate);
                     project.setStudentId(studentId);
                     project.setTeacherId(teacherId);
-                    project.setComment(comment.isEmpty() ? null : comment); // Lưu nhận xét
                     if ("admin".equals(loggedUser.getRole()) || "teacher".equals(loggedUser.getRole())) {
                         project.setStatus((String) cbStatusComboBox.getSelectedItem());
                     } else {
                         project.setStatus(project.getStatus()); // Giữ nguyên trạng thái
                     }
 
-                    if (!sourceFilePath.equals(project.getTepBaoCao()) && !sourceFilePath.isEmpty()) {
+                    if (!comment.isEmpty() && "teacher".equals(loggedUser.getRole())) {
+                        synchronized (projectDAO) {
+                            projectDAO.addComment(projectId, teacherId, comment);
+                            project.getComments().add(comment);
+                        }
+                    }
+
+                    if (!sourceFilePath.isEmpty() && !sourceFilePath.equals(project.getLatestFilePath())) {
                         if (checkSocketConnection()) {
                             uploadFileViaSocket(project.getProjectId(), sourceFilePath, dialog, project, btnSaveButton);
                         } else {
                             UIFileHandler.uploadFileWithProgress(dialog, sourceFilePath, result -> {
                                 if (result.isSuccess()) {
                                     try {
-                                        project.setTepBaoCao(result.getFilePath());
-                                        project.setNgayNop(new Date());
+                                        project.getFilePaths().add(result.getFilePath());
                                         synchronized (projectDAO) {
+                                            projectDAO.addFile(projectId, result.getFilePath());
+                                            project.setNgayNop(new Date());
                                             projectDAO.updateProject(project);
                                         }
                                         loadProjectsAsync();

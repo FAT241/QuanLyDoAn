@@ -188,12 +188,15 @@ public class ProjectSocketServer {
                 // Lưu file
                 Files.write(Paths.get(filePath), decodedData);
 
-                // Cập nhật database
+                // Cập nhật database với file mới
                 Project project = projectDAO.findById(projectId);
                 if (project != null) {
-                    project.setTepBaoCao(filePath);
-                    project.setNgayNop(new java.util.Date());
-                    projectDAO.updateProject(project);
+                    synchronized (projectDAO) {
+                        project.getFilePaths().add(filePath);
+                        projectDAO.addFile(project.getProjectId(), filePath);
+                        project.setNgayNop(new java.util.Date());
+                        projectDAO.updateProject(project);
+                    }
 
                     // Gửi response thành công
                     JsonObject response = new JsonObject();
@@ -217,9 +220,16 @@ public class ProjectSocketServer {
 
         private void handleFileDownload(JsonObject request) {
             try {
-                String filePath = request.get("filePath").getAsString();
-                File file = new File(filePath);
+                int projectId = request.get("projectId").getAsInt();
+                Project project = projectDAO.findById(projectId);
+                String filePath = project != null ? project.getLatestFilePath() : null;
 
+                if (filePath == null || filePath.isEmpty()) {
+                    sendErrorResponse("Không có file để tải xuống cho đồ án ID: " + projectId);
+                    return;
+                }
+
+                File file = new File(filePath);
                 if (!file.exists()) {
                     sendErrorResponse("File không tồn tại: " + filePath);
                     return;
