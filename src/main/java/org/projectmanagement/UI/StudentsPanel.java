@@ -38,6 +38,7 @@ public class StudentsPanel extends JPanel {
         // Tiêu đề
         JLabel title = new JLabel("Quản lý sinh viên", JLabel.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setForeground(Color.BLACK);
         title.setBorder(new EmptyBorder(10, 0, 10, 0));
         add(title, BorderLayout.NORTH);
 
@@ -45,31 +46,44 @@ public class StudentsPanel extends JPanel {
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         searchPanel.setBackground(Color.WHITE);
         searchPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+        JLabel searchLabel = new JLabel("Tìm kiếm:");
+        searchLabel.setForeground(Color.BLACK);
+
         txtSearch = new JTextField(20);
         txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtSearch.setForeground(Color.BLACK);
+
         btnSearch = new JButton("Tìm kiếm");
         btnSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btnSearch.setBackground(new Color(0, 123, 255));
-        btnSearch.setForeground(Color.WHITE);
+        btnSearch.setForeground(Color.BLACK);
+
         btnReset = new JButton("Reset");
         btnReset.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btnReset.setBackground(new Color(108, 117, 125));
-        btnReset.setForeground(Color.WHITE);
+        btnReset.setForeground(Color.BLACK);
+
         btnSearch.addActionListener(e -> searchStudents());
-        btnReset.addActionListener(e -> loadStudentsAsync());
-        searchPanel.add(new JLabel("Tìm kiếm:"));
+        btnReset.addActionListener(e -> {
+            txtSearch.setText("");
+            loadStudentsAsync();
+        });
+
+        searchPanel.add(searchLabel);
         searchPanel.add(txtSearch);
         searchPanel.add(btnSearch);
         searchPanel.add(btnReset);
-        add(searchPanel, BorderLayout.NORTH);
 
         // Bảng sinh viên
         studentTable = new JTable();
         studentTable.setRowHeight(30);
         studentTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        studentTable.setForeground(Color.BLACK);
         studentTable.setGridColor(new Color(200, 200, 200));
         studentTable.setShowGrid(true);
         studentTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+        studentTable.getTableHeader().setForeground(Color.BLACK);
         studentTable.getTableHeader().setBackground(new Color(230, 230, 230));
         studentTable.getTableHeader().setReorderingAllowed(false);
         studentTable.setDefaultRenderer(Object.class, new CustomTableCellRenderer());
@@ -79,21 +93,27 @@ public class StudentsPanel extends JPanel {
         // Nút hành động
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBackground(Color.WHITE);
+
         btnAdd = new JButton("Thêm sinh viên");
         btnEdit = new JButton("Sửa sinh viên");
         btnDelete = new JButton("Xóa sinh viên");
+
         btnAdd.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btnEdit.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btnDelete.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
         btnAdd.setBackground(new Color(0, 123, 255));
         btnEdit.setBackground(new Color(0, 123, 255));
         btnDelete.setBackground(new Color(255, 0, 0));
-        btnAdd.setForeground(Color.WHITE);
-        btnEdit.setForeground(Color.WHITE);
-        btnDelete.setForeground(Color.WHITE);
+
+        btnAdd.setForeground(Color.BLACK);
+        btnEdit.setForeground(Color.BLACK);
+        btnDelete.setForeground(Color.BLACK);
+
         btnAdd.addActionListener(e -> showAddStudentDialog());
         btnEdit.addActionListener(e -> showEditStudentDialog());
         btnDelete.addActionListener(e -> deleteSelectedStudent());
+
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnEdit);
         buttonPanel.add(btnDelete);
@@ -178,56 +198,89 @@ public class StudentsPanel extends JPanel {
     private void showAddStudentDialog() {
         JDialog dialog = new JDialog();
         dialog.setTitle("Thêm sinh viên");
-        dialog.setSize(400, 450); // Tăng kích thước để chứa thêm trường
+        dialog.setSize(600, 500); // Increased size to match ProjectsPanel
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new GridBagLayout());
+        dialog.setBackground(Color.WHITE);
+        ((JComponent) dialog.getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Added padding
+
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(10, 10, 10, 10); // Consistent insets
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         JTextField txtFullName = new JTextField(20);
+        txtFullName.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtFullName.setForeground(Color.BLACK);
         JTextField txtEmail = new JTextField(20);
+        txtEmail.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtEmail.setForeground(Color.BLACK);
         JTextField txtPhoneNumber = new JTextField(20);
+        txtPhoneNumber.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtPhoneNumber.setForeground(Color.BLACK);
         JTextField txtMajor = new JTextField(20);
+        txtMajor.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtMajor.setForeground(Color.BLACK);
         JTextField txtClassCode = new JTextField(20);
-        JTextField txtStudentCode = new JTextField(20); // Trường mã sinh viên
+        txtClassCode.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtClassCode.setForeground(Color.BLACK);
+        JTextField txtStudentCode = new JTextField(20);
+        txtStudentCode.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtStudentCode.setForeground(Color.BLACK);
         JButton btnSave = new JButton("Lưu");
+        btnSave.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        btnSave.setBackground(new Color(0, 123, 255));
+        btnSave.setForeground(Color.BLACK);
 
-        gbc.gridx = 0; gbc.gridy = 0;
-        dialog.add(new JLabel("Tên:"), gbc);
-        gbc.gridx = 1;
+        JLabel lblFullName = new JLabel("Tên:");
+        lblFullName.setForeground(Color.BLACK);
+        JLabel lblEmail = new JLabel("Email:");
+        lblEmail.setForeground(Color.BLACK);
+        JLabel lblPhoneNumber = new JLabel("Số điện thoại:");
+        lblPhoneNumber.setForeground(Color.BLACK);
+        JLabel lblMajor = new JLabel("Chuyên ngành:");
+        lblMajor.setForeground(Color.BLACK);
+        JLabel lblClassCode = new JLabel("Mã lớp:");
+        lblClassCode.setForeground(Color.BLACK);
+        JLabel lblStudentCode = new JLabel("Mã sinh viên:");
+        lblStudentCode.setForeground(Color.BLACK);
+
+        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.0;
+        dialog.add(lblFullName, gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
         dialog.add(txtFullName, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1;
-        dialog.add(new JLabel("Email:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.0;
+        dialog.add(lblEmail, gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
         dialog.add(txtEmail, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2;
-        dialog.add(new JLabel("Số điện thoại:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0.0;
+        dialog.add(lblPhoneNumber, gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
         dialog.add(txtPhoneNumber, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3;
-        dialog.add(new JLabel("Chuyên ngành:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0.0;
+        dialog.add(lblMajor, gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
         dialog.add(txtMajor, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 4;
-        dialog.add(new JLabel("Mã lớp:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 0; gbc.gridy = 4; gbc.weightx = 0.0;
+        dialog.add(lblClassCode, gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
         dialog.add(txtClassCode, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 5;
-        dialog.add(new JLabel("Mã sinh viên:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 0; gbc.gridy = 5; gbc.weightx = 0.0;
+        dialog.add(lblStudentCode, gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
         dialog.add(txtStudentCode, gbc);
 
-        gbc.gridx = 1; gbc.gridy = 6;
+        gbc.gridx = 1; gbc.gridy = 6; gbc.weightx = 0.0;
+        gbc.anchor = GridBagConstraints.CENTER;
         dialog.add(btnSave, gbc);
 
         btnSave.addActionListener(e -> {
             try {
-                // Validate input
                 String fullName = txtFullName.getText().trim();
                 String email = txtEmail.getText().trim();
                 String phoneNumber = txtPhoneNumber.getText().trim();
@@ -240,22 +293,19 @@ public class StudentsPanel extends JPanel {
                     return;
                 }
 
-                // Validate email format
                 if (!email.matches("^[\\w.-]+@[\\w.-]+\\.[A-Za-z]{2,6}$")) {
                     JOptionPane.showMessageDialog(this, "Định dạng email không hợp lệ.", "Lỗi", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
-                // Validate phone number
                 if (!phoneNumber.matches("\\d{9,12}")) {
                     JOptionPane.showMessageDialog(this, "Số điện thoại không hợp lệ.", "Lỗi", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
-                // Tạo tài khoản người dùng
                 User user = new User();
-                user.setUsername(email); // Dùng email làm username
-                user.setPassword(BCrypt.hashpw("pass123", BCrypt.gensalt())); // Mật khẩu mặc định
+                user.setUsername(email);
+                user.setPassword(BCrypt.hashpw("pass123", BCrypt.gensalt()));
                 user.setEmail(email);
                 user.setFullName(fullName);
                 user.setRole("user");
@@ -266,22 +316,18 @@ public class StudentsPanel extends JPanel {
                 UserDAO userDAO = new UserDAO(connection);
 
                 synchronized (userDAO) {
-                    // Kiểm tra email trùng lặp
                     if (userDAO.findByEmail(email) != null) {
                         JOptionPane.showMessageDialog(this, "Email đã được sử dụng.", "Lỗi", JOptionPane.WARNING_MESSAGE);
                         return;
                     }
 
-                    // Thêm tài khoản người dùng
                     userDAO.registerUser(user);
 
-                    // Lấy user_id vừa tạo
                     User createdUser = userDAO.findByEmail(email);
                     if (createdUser == null) {
                         throw new SQLException("Không thể lấy thông tin tài khoản vừa tạo.");
                     }
 
-                    // Tạo sinh viên
                     Student student = new Student(
                             0,
                             fullName,
@@ -289,11 +335,10 @@ public class StudentsPanel extends JPanel {
                             phoneNumber,
                             major,
                             classCode,
-                            createdUser.getUserId() // bổ sung userId
+                            createdUser.getUserId()
                     );
 
                     synchronized (studentDAO) {
-                        // Thêm sinh viên với user_id
                         studentDAO.addStudent(student, createdUser.getUserId());
                     }
                 }
@@ -326,63 +371,95 @@ public class StudentsPanel extends JPanel {
             }
             JDialog dialog = new JDialog();
             dialog.setTitle("Sửa sinh viên");
-            dialog.setSize(400, 450);
+            dialog.setSize(600, 500); // Increased size to match ProjectsPanel
             dialog.setLocationRelativeTo(this);
             dialog.setLayout(new GridBagLayout());
+            dialog.setBackground(Color.WHITE);
+            ((JComponent) dialog.getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Added padding
+
             GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(5, 5, 5, 5);
+            gbc.insets = new Insets(10, 10, 10, 10); // Consistent insets
+            gbc.anchor = GridBagConstraints.WEST;
+            gbc.fill = GridBagConstraints.HORIZONTAL;
 
             JTextField txtFullName = new JTextField(student.getFullName(), 20);
+            txtFullName.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            txtFullName.setForeground(Color.BLACK);
             JTextField txtEmail = new JTextField(student.getEmail(), 20);
+            txtEmail.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            txtEmail.setForeground(Color.BLACK);
             JTextField txtPhoneNumber = new JTextField(student.getPhoneNumber(), 20);
+            txtPhoneNumber.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            txtPhoneNumber.setForeground(Color.BLACK);
             JTextField txtMajor = new JTextField(student.getMajor(), 20);
+            txtMajor.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            txtMajor.setForeground(Color.BLACK);
             JTextField txtClassCode = new JTextField(student.getClassCode(), 20);
-            JTextField txtStudentCode = new JTextField(20); // Trường mã sinh viên
+            txtClassCode.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            txtClassCode.setForeground(Color.BLACK);
+            JTextField txtStudentCode = new JTextField(20);
+            txtStudentCode.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            txtStudentCode.setForeground(Color.BLACK);
             JButton btnSave = new JButton("Lưu");
+            btnSave.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            btnSave.setBackground(new Color(0, 123, 255));
+            btnSave.setForeground(Color.BLACK);
 
-            // Tìm user_id tương ứng
             UserDAO userDAO = new UserDAO(connection);
             User user = userDAO.findByEmail(student.getEmail());
             if (user != null) {
                 txtStudentCode.setText(user.getStudentCode());
             }
 
-            gbc.gridx = 0; gbc.gridy = 0;
-            dialog.add(new JLabel("Tên:"), gbc);
-            gbc.gridx = 1;
+            JLabel lblFullName = new JLabel("Tên:");
+            lblFullName.setForeground(Color.BLACK);
+            JLabel lblEmail = new JLabel("Email:");
+            lblEmail.setForeground(Color.BLACK);
+            JLabel lblPhoneNumber = new JLabel("Số điện thoại:");
+            lblPhoneNumber.setForeground(Color.BLACK);
+            JLabel lblMajor = new JLabel("Chuyên ngành:");
+            lblMajor.setForeground(Color.BLACK);
+            JLabel lblClassCode = new JLabel("Mã lớp:");
+            lblClassCode.setForeground(Color.BLACK);
+            JLabel lblStudentCode = new JLabel("Mã sinh viên:");
+            lblStudentCode.setForeground(Color.BLACK);
+
+            gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.0;
+            dialog.add(lblFullName, gbc);
+            gbc.gridx = 1; gbc.weightx = 1.0;
             dialog.add(txtFullName, gbc);
 
-            gbc.gridx = 0; gbc.gridy = 1;
-            dialog.add(new JLabel("Email:"), gbc);
-            gbc.gridx = 1;
+            gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.0;
+            dialog.add(lblEmail, gbc);
+            gbc.gridx = 1; gbc.weightx = 1.0;
             dialog.add(txtEmail, gbc);
 
-            gbc.gridx = 0; gbc.gridy = 2;
-            dialog.add(new JLabel("Số điện thoại:"), gbc);
-            gbc.gridx = 1;
+            gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0.0;
+            dialog.add(lblPhoneNumber, gbc);
+            gbc.gridx = 1; gbc.weightx = 1.0;
             dialog.add(txtPhoneNumber, gbc);
 
-            gbc.gridx = 0; gbc.gridy = 3;
-            dialog.add(new JLabel("Chuyên ngành:"), gbc);
-            gbc.gridx = 1;
+            gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0.0;
+            dialog.add(lblMajor, gbc);
+            gbc.gridx = 1; gbc.weightx = 1.0;
             dialog.add(txtMajor, gbc);
 
-            gbc.gridx = 0; gbc.gridy = 4;
-            dialog.add(new JLabel("Mã lớp:"), gbc);
-            gbc.gridx = 1;
+            gbc.gridx = 0; gbc.gridy = 4; gbc.weightx = 0.0;
+            dialog.add(lblClassCode, gbc);
+            gbc.gridx = 1; gbc.weightx = 1.0;
             dialog.add(txtClassCode, gbc);
 
-            gbc.gridx = 0; gbc.gridy = 5;
-            dialog.add(new JLabel("Mã sinh viên:"), gbc);
-            gbc.gridx = 1;
+            gbc.gridx = 0; gbc.gridy = 5; gbc.weightx = 0.0;
+            dialog.add(lblStudentCode, gbc);
+            gbc.gridx = 1; gbc.weightx = 1.0;
             dialog.add(txtStudentCode, gbc);
 
-            gbc.gridx = 1; gbc.gridy = 6;
+            gbc.gridx = 1; gbc.gridy = 6; gbc.weightx = 0.0;
+            gbc.anchor = GridBagConstraints.CENTER;
             dialog.add(btnSave, gbc);
 
             btnSave.addActionListener(e -> {
                 try {
-                    // Validate input
                     String fullName = txtFullName.getText().trim();
                     String email = txtEmail.getText().trim();
                     String phoneNumber = txtPhoneNumber.getText().trim();
@@ -395,33 +472,28 @@ public class StudentsPanel extends JPanel {
                         return;
                     }
 
-                    // Validate email format
                     if (!email.matches("^[\\w.-]+@[\\w.-]+\\.[A-Za-z]{2,6}$")) {
                         JOptionPane.showMessageDialog(this, "Định dạng email không hợp lệ.", "Lỗi", JOptionPane.WARNING_MESSAGE);
                         return;
                     }
 
-                    // Validate phone number
                     if (!phoneNumber.matches("\\d{9,12}")) {
                         JOptionPane.showMessageDialog(this, "Số điện thoại không hợp lệ.", "Lỗi", JOptionPane.WARNING_MESSAGE);
                         return;
                     }
 
-                    // Kiểm tra email trùng lặp với user khác
                     User existingUser = userDAO.findByEmail(email);
                     if (existingUser != null && existingUser.getUserId() != user.getUserId()) {
                         JOptionPane.showMessageDialog(this, "Email đã được sử dụng bởi tài khoản khác.", "Lỗi", JOptionPane.WARNING_MESSAGE);
                         return;
                     }
 
-                    // Cập nhật sinh viên
                     student.setFullName(fullName);
                     student.setEmail(email);
                     student.setPhoneNumber(phoneNumber);
                     student.setMajor(major);
                     student.setClassCode(classCode);
 
-                    // Cập nhật tài khoản người dùng
                     if (user != null) {
                         user.setEmail(email);
                         user.setFullName(fullName);

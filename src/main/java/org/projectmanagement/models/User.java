@@ -1,5 +1,7 @@
 package org.projectmanagement.models;
 
+import java.util.Objects;
+
 public class User {
     private int userId;
     private String username;
@@ -10,7 +12,6 @@ public class User {
     private String avatarPath;
     private String studentCode;
     private String phoneNumber;
-
 
     public User() {
         // constructor rỗng để dùng cho RegisterPanel
@@ -101,5 +102,18 @@ public class User {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return userId == user.userId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId);
     }
 }

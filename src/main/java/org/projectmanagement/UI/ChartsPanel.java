@@ -48,30 +48,42 @@ public class ChartsPanel extends JPanel {
         // Tiêu đề
         JLabel title = new JLabel("Thống kê đồ án", JLabel.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setForeground(Color.BLACK);
         title.setBorder(new EmptyBorder(10, 0, 10, 0));
-        add(title, BorderLayout.NORTH);
 
         // Thanh tìm kiếm
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         searchPanel.setBackground(Color.WHITE);
         searchPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        JLabel searchLabel = new JLabel("Tìm kiếm:");
+        searchLabel.setForeground(Color.BLACK);
         txtSearch = new JTextField(20);
         txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtSearch.setForeground(Color.BLACK);
         btnSearch = new JButton("Tìm kiếm");
         btnSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btnSearch.setBackground(new Color(0, 123, 255));
-        btnSearch.setForeground(Color.WHITE);
+        btnSearch.setForeground(Color.BLACK); // Updated to black
         btnReset = new JButton("Reset");
         btnReset.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btnReset.setBackground(new Color(108, 117, 125));
-        btnReset.setForeground(Color.WHITE);
+        btnReset.setForeground(Color.BLACK); // Updated to black
         btnSearch.addActionListener(e -> searchAndUpdateChart());
-        btnReset.addActionListener(e -> loadChartAsync());
-        searchPanel.add(new JLabel("Tìm kiếm:"));
+        btnReset.addActionListener(e -> {
+            txtSearch.setText(""); // Clear search field
+            loadChartAsync();
+        });
+        searchPanel.add(searchLabel);
         searchPanel.add(txtSearch);
         searchPanel.add(btnSearch);
         searchPanel.add(btnReset);
-        add(searchPanel, BorderLayout.NORTH);
+
+        // Container for title and search panel
+        JPanel northPanel = new JPanel(new BorderLayout());
+        northPanel.setBackground(Color.WHITE);
+        northPanel.add(title, BorderLayout.NORTH);
+        northPanel.add(searchPanel, BorderLayout.CENTER);
+        add(northPanel, BorderLayout.NORTH);
 
         // Panel chứa hai biểu đồ (xếp dọc)
         JPanel chartsContainer = new JPanel();
@@ -100,9 +112,9 @@ public class ChartsPanel extends JPanel {
         ));
         barChartPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        chartsContainer.add(Box.createVerticalStrut(10)); // Khoảng cách
+        chartsContainer.add(Box.createVerticalStrut(10));
         chartsContainer.add(pieChartPanel);
-        chartsContainer.add(Box.createVerticalStrut(20)); // Khoảng cách giữa biểu đồ
+        chartsContainer.add(Box.createVerticalStrut(20));
         chartsContainer.add(barChartPanel);
         chartsContainer.add(Box.createVerticalStrut(10));
 

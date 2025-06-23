@@ -36,38 +36,58 @@ public class TeachersPanel extends JPanel {
         // Tiêu đề
         JLabel title = new JLabel("Quản lý giảng viên", JLabel.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        title.setBorder(new EmptyBorder(10, 0, 30, 0));
-        add(title, BorderLayout.NORTH);
+        title.setForeground(Color.BLACK);
+        title.setBorder(new EmptyBorder(10, 0, 10, 0));
 
         // Thanh tìm kiếm
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         searchPanel.setBackground(Color.WHITE);
         searchPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+        JLabel searchLabel = new JLabel("Tìm kiếm:");
+        searchLabel.setForeground(Color.BLACK);
+
         txtSearch = new JTextField(20);
         txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtSearch.setForeground(Color.BLACK);
+
         btnSearch = new JButton("Tìm kiếm");
         btnSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btnSearch.setBackground(new Color(0, 123, 255));
-        btnSearch.setForeground(Color.WHITE);
+        btnSearch.setForeground(Color.BLACK);
+
         btnReset = new JButton("Reset");
         btnReset.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btnReset.setBackground(new Color(108, 117, 125));
-        btnReset.setForeground(Color.WHITE);
+        btnReset.setForeground(Color.BLACK);
+
         btnSearch.addActionListener(e -> searchTeachers());
-        btnReset.addActionListener(e -> loadTeachersAsync());
-        searchPanel.add(new JLabel("Tìm kiếm:"));
+        btnReset.addActionListener(e -> {
+            txtSearch.setText("");
+            loadTeachersAsync();
+        });
+
+        searchPanel.add(searchLabel);
         searchPanel.add(txtSearch);
         searchPanel.add(btnSearch);
         searchPanel.add(btnReset);
-        add(searchPanel, BorderLayout.NORTH);
+
+        // Container for title and search panel
+        JPanel northPanel = new JPanel(new BorderLayout());
+        northPanel.setBackground(Color.WHITE);
+        northPanel.add(title, BorderLayout.NORTH);
+        northPanel.add(searchPanel, BorderLayout.CENTER);
+        add(northPanel, BorderLayout.NORTH);
 
         // Bảng giảng viên
         teacherTable = new JTable();
         teacherTable.setRowHeight(30);
         teacherTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        teacherTable.setForeground(Color.BLACK);
         teacherTable.setGridColor(new Color(200, 200, 200));
         teacherTable.setShowGrid(true);
         teacherTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+        teacherTable.getTableHeader().setForeground(Color.BLACK);
         teacherTable.getTableHeader().setBackground(new Color(230, 230, 230));
         teacherTable.getTableHeader().setReorderingAllowed(false);
         teacherTable.setDefaultRenderer(Object.class, new CustomTableCellRenderer());
@@ -77,21 +97,27 @@ public class TeachersPanel extends JPanel {
         // Nút hành động
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBackground(Color.WHITE);
+
         btnAdd = new JButton("Thêm giảng viên");
         btnEdit = new JButton("Sửa giảng viên");
         btnDelete = new JButton("Xóa giảng viên");
+
         btnAdd.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btnEdit.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btnDelete.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
         btnAdd.setBackground(new Color(0, 123, 255));
         btnEdit.setBackground(new Color(0, 123, 255));
         btnDelete.setBackground(new Color(255, 0, 0));
-        btnAdd.setForeground(Color.WHITE);
-        btnEdit.setForeground(Color.WHITE);
-        btnDelete.setForeground(Color.WHITE);
+
+        btnAdd.setForeground(Color.BLACK);
+        btnEdit.setForeground(Color.BLACK);
+        btnDelete.setForeground(Color.BLACK);
+
         btnAdd.addActionListener(e -> showAddTeacherDialog());
         btnEdit.addActionListener(e -> showEditTeacherDialog());
         btnDelete.addActionListener(e -> deleteSelectedTeacher());
+
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnEdit);
         buttonPanel.add(btnDelete);
@@ -175,39 +201,65 @@ public class TeachersPanel extends JPanel {
     private void showAddTeacherDialog() {
         JDialog dialog = new JDialog();
         dialog.setTitle("Thêm giảng viên");
-        dialog.setSize(400, 350);
+        dialog.setSize(600, 400); // Increased size to match ProjectsPanel
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new GridBagLayout());
+        dialog.setBackground(Color.WHITE);
+        ((JComponent) dialog.getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Added padding
+
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(10, 10, 10, 10); // Consistent insets
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         JTextField txtFullName = new JTextField(20);
+        txtFullName.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtFullName.setForeground(Color.BLACK);
         JTextField txtEmail = new JTextField(20);
+        txtEmail.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtEmail.setForeground(Color.BLACK);
         JTextField txtPhoneNumber = new JTextField(20);
+        txtPhoneNumber.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtPhoneNumber.setForeground(Color.BLACK);
         JTextField txtPosition = new JTextField(20);
+        txtPosition.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtPosition.setForeground(Color.BLACK);
         JButton btnSave = new JButton("Lưu");
+        btnSave.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        btnSave.setBackground(new Color(0, 123, 255));
+        btnSave.setForeground(Color.BLACK);
 
-        gbc.gridx = 0; gbc.gridy = 0;
-        dialog.add(new JLabel("Tên:"), gbc);
-        gbc.gridx = 1;
+        JLabel lblFullName = new JLabel("Tên:");
+        lblFullName.setForeground(Color.BLACK);
+        JLabel lblEmail = new JLabel("Email:");
+        lblEmail.setForeground(Color.BLACK);
+        JLabel lblPhoneNumber = new JLabel("Số điện thoại:");
+        lblPhoneNumber.setForeground(Color.BLACK);
+        JLabel lblPosition = new JLabel("Chức vụ:");
+        lblPosition.setForeground(Color.BLACK);
+
+        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.0;
+        dialog.add(lblFullName, gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
         dialog.add(txtFullName, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1;
-        dialog.add(new JLabel("Email:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.0;
+        dialog.add(lblEmail, gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
         dialog.add(txtEmail, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2;
-        dialog.add(new JLabel("Số điện thoại:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0.0;
+        dialog.add(lblPhoneNumber, gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
         dialog.add(txtPhoneNumber, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3;
-        dialog.add(new JLabel("Chức vụ:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0.0;
+        dialog.add(lblPosition, gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
         dialog.add(txtPosition, gbc);
 
-        gbc.gridx = 1; gbc.gridy = 4;
+        gbc.gridx = 1; gbc.gridy = 4; gbc.weightx = 0.0;
+        gbc.anchor = GridBagConstraints.CENTER;
         dialog.add(btnSave, gbc);
 
         btnSave.addActionListener(e -> {
@@ -249,39 +301,65 @@ public class TeachersPanel extends JPanel {
             }
             JDialog dialog = new JDialog();
             dialog.setTitle("Sửa giảng viên");
-            dialog.setSize(400, 350);
+            dialog.setSize(600, 400); // Increased size to match ProjectsPanel
             dialog.setLocationRelativeTo(this);
             dialog.setLayout(new GridBagLayout());
+            dialog.setBackground(Color.WHITE);
+            ((JComponent) dialog.getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Added padding
+
             GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(5, 5, 5, 5);
+            gbc.insets = new Insets(10, 10, 10, 10); // Consistent insets
+            gbc.anchor = GridBagConstraints.WEST;
+            gbc.fill = GridBagConstraints.HORIZONTAL;
 
             JTextField txtFullName = new JTextField(teacher.getFullName(), 20);
+            txtFullName.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            txtFullName.setForeground(Color.BLACK);
             JTextField txtEmail = new JTextField(teacher.getEmail(), 20);
+            txtEmail.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            txtEmail.setForeground(Color.BLACK);
             JTextField txtPhoneNumber = new JTextField(teacher.getPhoneNumber(), 20);
+            txtPhoneNumber.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            txtPhoneNumber.setForeground(Color.BLACK);
             JTextField txtPosition = new JTextField(teacher.getPosition(), 20);
+            txtPosition.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            txtPosition.setForeground(Color.BLACK);
             JButton btnSave = new JButton("Lưu");
+            btnSave.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            btnSave.setBackground(new Color(0, 123, 255));
+            btnSave.setForeground(Color.BLACK);
 
-            gbc.gridx = 0; gbc.gridy = 0;
-            dialog.add(new JLabel("Tên:"), gbc);
-            gbc.gridx = 1;
+            JLabel lblFullName = new JLabel("Tên:");
+            lblFullName.setForeground(Color.BLACK);
+            JLabel lblEmail = new JLabel("Email:");
+            lblEmail.setForeground(Color.BLACK);
+            JLabel lblPhoneNumber = new JLabel("Số điện thoại:");
+            lblPhoneNumber.setForeground(Color.BLACK);
+            JLabel lblPosition = new JLabel("Chức vụ:");
+            lblPosition.setForeground(Color.BLACK);
+
+            gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.0;
+            dialog.add(lblFullName, gbc);
+            gbc.gridx = 1; gbc.weightx = 1.0;
             dialog.add(txtFullName, gbc);
 
-            gbc.gridx = 0; gbc.gridy = 1;
-            dialog.add(new JLabel("Email:"), gbc);
-            gbc.gridx = 1;
+            gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.0;
+            dialog.add(lblEmail, gbc);
+            gbc.gridx = 1; gbc.weightx = 1.0;
             dialog.add(txtEmail, gbc);
 
-            gbc.gridx = 0; gbc.gridy = 2;
-            dialog.add(new JLabel("Số điện thoại:"), gbc);
-            gbc.gridx = 1;
+            gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0.0;
+            dialog.add(lblPhoneNumber, gbc);
+            gbc.gridx = 1; gbc.weightx = 1.0;
             dialog.add(txtPhoneNumber, gbc);
 
-            gbc.gridx = 0; gbc.gridy = 3;
-            dialog.add(new JLabel("Chức vụ:"), gbc);
-            gbc.gridx = 1;
+            gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0.0;
+            dialog.add(lblPosition, gbc);
+            gbc.gridx = 1; gbc.weightx = 1.0;
             dialog.add(txtPosition, gbc);
 
-            gbc.gridx = 1; gbc.gridy = 4;
+            gbc.gridx = 1; gbc.gridy = 4; gbc.weightx = 0.0;
+            gbc.anchor = GridBagConstraints.CENTER;
             dialog.add(btnSave, gbc);
 
             btnSave.addActionListener(e -> {
