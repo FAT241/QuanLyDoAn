@@ -12,7 +12,7 @@ public class ProjectDAO {
     public ProjectDAO(Connection connection) {
         this.connection = connection;
     }
-
+//Tìm tất cả các dự án
     public List<Project> findAll() throws SQLException {
         List<Project> projects = new ArrayList<>();
         String sql = "SELECT p.project_id, p.title, p.description, p.ngay_bat_dau, p.ngay_ket_thuc, p.ngay_nop, p.status, " +
@@ -49,7 +49,7 @@ public class ProjectDAO {
         }
         return projects;
     }
-
+// Tìm dự án theo ID
     public Project findById(int projectId) throws SQLException {
         String sql = "SELECT p.project_id, p.title, p.description, p.ngay_bat_dau, p.ngay_ket_thuc, p.ngay_nop, p.status, " +
                 "p.process_score, p.defense_score, p.final_score, p.grade, " +
@@ -87,7 +87,7 @@ public class ProjectDAO {
         }
         return null;
     }
-
+// Tìm kiếm dự án theo tiêu đề hoặc ID sinh viên
     public List<Project> searchByTitleOrStudentId(String keyword) throws SQLException {
         List<Project> projects = new ArrayList<>();
         String sql = "SELECT p.project_id, p.title, p.description, p.ngay_bat_dau, p.ngay_ket_thuc, p.ngay_nop, p.status, " +
@@ -127,7 +127,7 @@ public class ProjectDAO {
         }
         return projects;
     }
-
+// Thêm dự án mới
     public boolean addProject(Project project) throws SQLException {
         String sql = "INSERT INTO projects (title, description, ngay_bat_dau, ngay_ket_thuc, status, student_id, teacher_id) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -152,7 +152,7 @@ public class ProjectDAO {
         }
         return false;
     }
-
+// Cập nhật thông tin dự án
     public boolean updateProject(Project project) throws SQLException {
         String sql = "UPDATE projects " +
                 "SET title = ?, description = ?, ngay_bat_dau = ?, ngay_ket_thuc = ?, status = ?, " +
@@ -177,7 +177,7 @@ public class ProjectDAO {
             return pstmt.executeUpdate() > 0;
         }
     }
-
+// Xóa dự án
     public boolean deleteProject(int projectId) throws SQLException {
         String sql = "DELETE FROM projects WHERE project_id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -185,7 +185,7 @@ public class ProjectDAO {
             return pstmt.executeUpdate() > 0;
         }
     }
-
+// Thêm tệp vào dự án
     public boolean addFile(int projectId, String filePath) throws SQLException {
         String sql = "INSERT INTO project_files (project_id, file_path) VALUES (?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -194,7 +194,7 @@ public class ProjectDAO {
             return pstmt.executeUpdate() > 0;
         }
     }
-
+// Thêm bình luận vào dự án
     public boolean addComment(int projectId, int teacherId, String comment) throws SQLException {
         String sql = "INSERT INTO project_comments (project_id, teacher_id, comment) VALUES (?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -204,7 +204,7 @@ public class ProjectDAO {
             return pstmt.executeUpdate() > 0;
         }
     }
-
+// Tải đường dẫn tệp và bình luận từ cơ sở dữ liệu
     private List<String> loadFilePaths(int projectId) throws SQLException {
         List<String> filePaths = new ArrayList<>();
         String sql = "SELECT file_path FROM project_files WHERE project_id = ?";
@@ -217,7 +217,7 @@ public class ProjectDAO {
         }
         return filePaths;
     }
-
+// Tải bình luận từ cơ sở dữ liệu
     private List<String> loadComments(int projectId) throws SQLException {
         List<String> comments = new ArrayList<>();
         String sql = "SELECT comment FROM project_comments WHERE project_id = ?";
@@ -230,7 +230,7 @@ public class ProjectDAO {
         }
         return comments;
     }
-
+// Cập nhật điểm số của dự án
     public boolean updateScores(int projectId, Double processScore, Double defenseScore) throws SQLException {
         String sql = "UPDATE projects " +
                 "SET process_score = ?, defense_score = ?, final_score = ?, grade = ? " +

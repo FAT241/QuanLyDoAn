@@ -90,7 +90,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
 
         JLabel title = new JLabel("Quản lý đồ án", JLabel.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        title.setForeground(Color.BLACK); // Added black foreground for title
+        title.setForeground(Color.BLACK);
         title.setBorder(new EmptyBorder(10, 20, 10, 0));
 
         // Status panel
@@ -109,19 +109,19 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         searchPanel.setBackground(Color.WHITE);
         searchPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-        JLabel searchLabel = new JLabel("Tìm kiếm:"); // Created separate search label
-        searchLabel.setForeground(Color.BLACK); // Set black foreground for search label
+        JLabel searchLabel = new JLabel("Tìm kiếm:");
+        searchLabel.setForeground(Color.BLACK);
         txtSearch = new JTextField(20);
         txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtSearch.setForeground(Color.BLACK); // Added black foreground for search field
+        txtSearch.setForeground(Color.BLACK);
         btnSearch = new JButton("Tìm kiếm");
         btnSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        btnSearch.setBackground(new Color(0, 123, 255)); // Blue for primary action
-        btnSearch.setForeground(Color.BLACK); // Changed to black foreground
+        btnSearch.setBackground(new Color(0, 123, 255));
+        btnSearch.setForeground(Color.BLACK);
         btnReset = new JButton("Reset");
         btnReset.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        btnReset.setBackground(new Color(108, 117, 125)); // Gray for secondary action
-        btnReset.setForeground(Color.BLACK); // Changed to black foreground
+        btnReset.setBackground(new Color(108, 117, 125));
+        btnReset.setForeground(Color.BLACK);
 
         btnSearch.addActionListener(e -> searchProjects());
         btnReset.addActionListener(e -> loadProjectsAsync());
@@ -139,12 +139,12 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
         projectTable = new JTable();
         projectTable.setRowHeight(30);
         projectTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        projectTable.setForeground(Color.BLACK); // Added black foreground for table data
+        projectTable.setForeground(Color.BLACK);
         projectTable.setGridColor(new Color(200, 200, 200));
         projectTable.setShowGrid(true);
         projectTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
         projectTable.getTableHeader().setBackground(new Color(230, 230, 230));
-        projectTable.getTableHeader().setForeground(Color.BLACK); // Added black foreground for table header
+        projectTable.getTableHeader().setForeground(Color.BLACK);
         projectTable.getTableHeader().setReorderingAllowed(false);
         projectTable.setDefaultRenderer(Object.class, new CustomTableCellRenderer());
 
@@ -158,11 +158,22 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
 
         if ("user".equals(loggedUser.getRole())) {
             btnAdd = new JButton("Thêm đồ án");
+            btnDelete = new JButton("Xóa đồ án"); // Thêm nút xóa cho role user
+
             btnAdd.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            btnDelete.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
             btnAdd.setBackground(new Color(0, 123, 255)); // Blue for primary action
-            btnAdd.setForeground(Color.BLACK); // Changed to black foreground
+            btnDelete.setBackground(new Color(255, 0, 0)); // Red for delete action
+
+            btnAdd.setForeground(Color.BLACK);
+            btnDelete.setForeground(Color.BLACK);
+
             btnAdd.addActionListener(e -> showAddProjectDialog());
+            btnDelete.addActionListener(e -> deleteSelectedProject());
+
             buttonPanel.add(btnAdd);
+            buttonPanel.add(btnDelete);
         } else if ("admin".equals(loggedUser.getRole())) {
             btnAdd = new JButton("Thêm đồ án");
             btnEdit = new JButton("Sửa đồ án");
@@ -172,13 +183,13 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             btnEdit.setFont(new Font("Segoe UI", Font.PLAIN, 14));
             btnDelete.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
-            btnAdd.setBackground(new Color(0, 123, 255)); // Blue for primary action
-            btnEdit.setBackground(new Color(0, 123, 255)); // Blue for primary action
-            btnDelete.setBackground(new Color(255, 0, 0)); // Red for delete action
+            btnAdd.setBackground(new Color(0, 123, 255));
+            btnEdit.setBackground(new Color(0, 123, 255));
+            btnDelete.setBackground(new Color(255, 0, 0));
 
-            btnAdd.setForeground(Color.BLACK); // Changed to black foreground
-            btnEdit.setForeground(Color.BLACK); // Changed to black foreground
-            btnDelete.setForeground(Color.BLACK); // Changed to black foreground
+            btnAdd.setForeground(Color.BLACK);
+            btnEdit.setForeground(Color.BLACK);
+            btnDelete.setForeground(Color.BLACK);
 
             btnAdd.addActionListener(e -> showAddProjectDialog());
             btnEdit.addActionListener(e -> showEditProjectDialog());
@@ -190,8 +201,8 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
         } else if ("teacher".equals(loggedUser.getRole())) {
             btnEdit = new JButton("Sửa đồ án");
             btnEdit.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            btnEdit.setBackground(new Color(0, 123, 255)); // Blue for primary action
-            btnEdit.setForeground(Color.BLACK); // Changed to black foreground
+            btnEdit.setBackground(new Color(0, 123, 255));
+            btnEdit.setForeground(Color.BLACK);
             btnEdit.addActionListener(e -> showEditProjectDialog());
             buttonPanel.add(btnEdit);
         }
@@ -402,7 +413,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
         for (int i = 0; i < projects.size(); i++) {
             Project p = projects.get(i);
             JButton btnDownload = new JButton("Tải xuống");
-            btnDownload.setForeground(Color.BLACK); // Added black foreground for download button
+            btnDownload.setForeground(Color.BLACK);
             btnDownload.setEnabled(p.getLatestFilePath() != null && !p.getLatestFilePath().isEmpty());
             btnDownload.addActionListener(e -> downloadFileViaSocket(p.getLatestFilePath()));
 
@@ -437,7 +448,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
         projectTable.setModel(model);
         projectTable.getColumnModel().getColumn(11).setCellRenderer(new ButtonRenderer());
         projectTable.getColumnModel().getColumn(11).setCellEditor(new ButtonEditor(new JCheckBox()));
-        projectTable.getColumnModel().getColumn(10).setPreferredWidth(200); // Tăng chiều rộng cột Nhận xét
+        projectTable.getColumnModel().getColumn(10).setPreferredWidth(200);
     }
 
     private void downloadFileViaSocket(String filePath) {
@@ -516,27 +527,27 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
 
         JTextField txtTitle = new JTextField(30);
         txtTitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtTitle.setForeground(Color.BLACK); // Added black foreground
+        txtTitle.setForeground(Color.BLACK);
         JTextArea txtDescription = new JTextArea(4, 30);
         txtDescription.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtDescription.setForeground(Color.BLACK); // Added black foreground
+        txtDescription.setForeground(Color.BLACK);
         txtDescription.setLineWrap(true);
         txtDescription.setWrapStyleWord(true);
         JScrollPane scrollDescription = new JScrollPane(txtDescription);
         JTextField txtStartDate = new JTextField(30);
         txtStartDate.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtStartDate.setForeground(Color.BLACK); // Added black foreground
+        txtStartDate.setForeground(Color.BLACK);
         JTextField txtEndDate = new JTextField(30);
         txtEndDate.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtEndDate.setForeground(Color.BLACK); // Added black foreground
+        txtEndDate.setForeground(Color.BLACK);
         JTextField txtReportFile = new JTextField(20);
         txtReportFile.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtReportFile.setForeground(Color.BLACK); // Added black foreground
+        txtReportFile.setForeground(Color.BLACK);
         txtReportFile.setEditable(false);
 
         JComboBox<String> cbStudent = new JComboBox<>();
         cbStudent.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        cbStudent.setForeground(Color.BLACK); // Added black foreground
+        cbStudent.setForeground(Color.BLACK);
         StudentDAO studentDAO = new StudentDAO(connection);
         try {
             List<Student> students = studentDAO.findAll();
@@ -570,7 +581,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
 
         JComboBox<String> cbTeacher = new JComboBox<>();
         cbTeacher.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        cbTeacher.setForeground(Color.BLACK); // Added black foreground
+        cbTeacher.setForeground(Color.BLACK);
         TeacherDAO teacherDAO = new TeacherDAO(connection);
         try {
             List<Teacher> teachers = teacherDAO.findAll();
@@ -583,40 +594,40 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
         }
 
         JLabel lblStatus = new JLabel("Trạng thái:");
-        lblStatus.setForeground(Color.BLACK); // Added black foreground
+        lblStatus.setForeground(Color.BLACK);
         JTextField txtStatus = new JTextField("CHO_DUYET", 30);
         txtStatus.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtStatus.setForeground(Color.BLACK); // Added black foreground
+        txtStatus.setForeground(Color.BLACK);
         txtStatus.setEditable(false);
         JComboBox<String> cbStatus = new JComboBox<>(new String[]{"CHO_DUYET", "DUYET", "TU_CHOI", "DA_NOP"});
         cbStatus.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        cbStatus.setForeground(Color.BLACK); // Added black foreground
+        cbStatus.setForeground(Color.BLACK);
         cbStatus.setSelectedItem("CHO_DUYET");
 
         JButton btnChooseFile = new JButton("Chọn file");
         btnChooseFile.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        btnChooseFile.setBackground(new Color(108, 117, 125)); // Gray for secondary action
-        btnChooseFile.setForeground(Color.BLACK); // Changed to black foreground
+        btnChooseFile.setBackground(new Color(108, 117, 125));
+        btnChooseFile.setForeground(Color.BLACK);
 
         JButton btnSave = new JButton("Lưu");
         btnSave.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        btnSave.setBackground(new Color(0, 123, 255)); // Blue for primary action
-        btnSave.setForeground(Color.BLACK); // Changed to black foreground
+        btnSave.setBackground(new Color(0, 123, 255));
+        btnSave.setForeground(Color.BLACK);
 
-        JLabel lblTitle = new JLabel("Tiêu đề:"); // Separate label
-        lblTitle.setForeground(Color.BLACK); // Black foreground
-        JLabel lblDescription = new JLabel("Mô tả:"); // Separate label
-        lblDescription.setForeground(Color.BLACK); // Black foreground
-        JLabel lblStartDate = new JLabel("Ngày bắt đầu (yyyy-MM-dd):"); // Separate label
-        lblStartDate.setForeground(Color.BLACK); // Black foreground
-        JLabel lblEndDate = new JLabel("Ngày kết thúc (yyyy-MM-dd):"); // Separate label
-        lblEndDate.setForeground(Color.BLACK); // Black foreground
-        JLabel lblReportFile = new JLabel("File báo cáo:"); // Separate label
-        lblReportFile.setForeground(Color.BLACK); // Black foreground
-        JLabel lblStudent = new JLabel("Sinh viên:"); // Separate label
-        lblStudent.setForeground(Color.BLACK); // Black foreground
-        JLabel lblTeacher = new JLabel("Giảng viên:"); // Separate label
-        lblTeacher.setForeground(Color.BLACK); // Black foreground
+        JLabel lblTitle = new JLabel("Tiêu đề:");
+        lblTitle.setForeground(Color.BLACK);
+        JLabel lblDescription = new JLabel("Mô tả:");
+        lblDescription.setForeground(Color.BLACK);
+        JLabel lblStartDate = new JLabel("Ngày bắt đầu (yyyy-MM-dd):");
+        lblStartDate.setForeground(Color.BLACK);
+        JLabel lblEndDate = new JLabel("Ngày kết thúc (yyyy-MM-dd):");
+        lblEndDate.setForeground(Color.BLACK);
+        JLabel lblReportFile = new JLabel("File báo cáo:");
+        lblReportFile.setForeground(Color.BLACK);
+        JLabel lblStudent = new JLabel("Sinh viên:");
+        lblStudent.setForeground(Color.BLACK);
+        JLabel lblTeacher = new JLabel("Giảng viên:");
+        lblTeacher.setForeground(Color.BLACK);
 
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -868,13 +879,39 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                     }).thenAccept(result -> {
                         SwingUtilities.invokeLater(() -> {
                             progressDialog.dispose();
+
                             if (result.isSuccess()) {
                                 try {
+                                    // Kiểm tra kỹ lưỡng result trước khi xử lý
                                     String uploadedFilePath = result.getFilePath();
+
+                                    // Debug logging
+                                    System.out.println("Upload result: " + result);
+                                    System.out.println("File path from result: " + uploadedFilePath);
+
+                                    // Xử lý trường hợp filePath null hoặc empty
                                     if (uploadedFilePath == null || uploadedFilePath.trim().isEmpty()) {
-                                        throw new SQLException("Đường dẫn file tải lên không hợp lệ: " + uploadedFilePath);
+                                        // Thử lấy từ các field khác của result nếu có
+                                        String alternativePath = tryGetAlternativeFilePath(result, filePath);
+
+                                        if (alternativePath != null && !alternativePath.trim().isEmpty()) {
+                                            uploadedFilePath = alternativePath;
+                                            System.out.println("Using alternative path: " + uploadedFilePath);
+                                        } else {
+                                            // Log chi tiết để debug
+                                            System.err.println("Upload result details:");
+                                            System.err.println("- Success: " + result.isSuccess());
+                                            System.err.println("- Message: " + result.getMessage());
+                                            System.err.println("- FilePath: " + result.getFilePath());
+
+                                            throw new SQLException("Server không trả về đường dẫn file hợp lệ. " +
+                                                    "Vui lòng kiểm tra cấu hình server hoặc thử lại.");
+                                        }
                                     }
+
+                                    // Thêm file vào project
                                     project.getFilePaths().add(uploadedFilePath);
+
                                     synchronized (projectDAO) {
                                         boolean fileAdded = projectDAO.addFile(projectId, uploadedFilePath);
                                         if (fileAdded) {
@@ -885,24 +922,39 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                                             showNotification("Đồ án đã được tạo nhưng có lỗi khi liên kết file.", "warning");
                                         }
                                     }
+
                                     loadProjectsAsync();
                                     parentDialog.dispose();
+
                                 } catch (SQLException ex) {
-                                    showNotification("Lỗi cập nhật database: " + ex.getMessage(), "error");
+                                    System.err.println("SQL Exception in upload process: " + ex.getMessage());
                                     ex.printStackTrace();
+                                    showNotification("Lỗi xử lý file: " + ex.getMessage(), "error");
+                                } catch (Exception ex) {
+                                    System.err.println("General Exception in upload process: " + ex.getMessage());
+                                    ex.printStackTrace();
+                                    showNotification("Lỗi không xác định: " + ex.getMessage(), "error");
                                 }
                             } else {
-                                showNotification("Lỗi tải lên file: " +
-                                        (result.getMessage() != null ? result.getMessage() : "Upload failed"), "error");
+                                String errorMsg = result.getMessage() != null ? result.getMessage() : "Upload failed";
+                                System.err.println("Upload failed: " + errorMsg);
+                                showNotification("Lỗi tải lên file: " + errorMsg, "error");
                             }
+
+                            // Reset button state
                             btnSave.setEnabled(true);
                             btnSave.setText("Lưu");
                         });
                     }).exceptionally(throwable -> {
                         SwingUtilities.invokeLater(() -> {
                             progressDialog.dispose();
-                            showNotification("Lỗi khi tải lên: " + throwable.getMessage(), "error");
+                            System.err.println("Upload exception: " + throwable.getMessage());
                             throwable.printStackTrace();
+
+                            String errorMsg = throwable.getCause() != null ?
+                                    throwable.getCause().getMessage() : throwable.getMessage();
+                            showNotification("Lỗi kết nối: " + errorMsg, "error");
+
                             btnSave.setEnabled(true);
                             btnSave.setText("Lưu");
                         });
@@ -939,7 +991,10 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                 } catch (ExecutionException e) {
                     SwingUtilities.invokeLater(() -> {
                         progressDialog.dispose();
-                        showNotification("Lỗi upload: " + e.getCause().getMessage(), "error");
+                        Throwable cause = e.getCause();
+                        String errorMsg = cause != null ? cause.getMessage() : e.getMessage();
+                        showNotification("Lỗi upload: " + errorMsg, "error");
+                        System.err.println("ExecutionException in upload: " + errorMsg);
                         e.printStackTrace();
                         btnSave.setEnabled(true);
                         btnSave.setText("Lưu");
@@ -954,6 +1009,40 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
 
         uploadWorker.execute();
     }
+    private String tryGetAlternativeFilePath(Object result, String originalFilePath) {
+        try {
+            // Thử reflection để lấy các field khác của result object
+            Class<?> resultClass = result.getClass();
+
+            // Thử các tên field có thể có
+            String[] possibleFields = {"path", "fileName", "uploadPath", "serverPath", "relativePath"};
+
+            for (String fieldName : possibleFields) {
+                try {
+                    java.lang.reflect.Field field = resultClass.getDeclaredField(fieldName);
+                    field.setAccessible(true);
+                    Object value = field.get(result);
+                    if (value != null && !value.toString().trim().isEmpty()) {
+                        return value.toString();
+                    }
+                } catch (NoSuchFieldException | IllegalAccessException ignored) {
+                    // Tiếp tục thử field khác
+                }
+            }
+
+            // Nếu không có field nào, thử sử dụng tên file gốc
+            if (originalFilePath != null) {
+                File file = new File(originalFilePath);
+                return file.getName(); // Chỉ lấy tên file, không có path
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error trying to get alternative file path: " + e.getMessage());
+        }
+
+        return null;
+    }
+
 
     private void showEditProjectDialog() {
         int selectedRow = projectTable.getSelectedRow();
@@ -981,34 +1070,34 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
 
             JTextField txtTitle = new JTextField(project.getTitle(), 30);
             txtTitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            txtTitle.setForeground(Color.BLACK); // Added black foreground
+            txtTitle.setForeground(Color.BLACK);
             JTextArea txtDescription = new JTextArea(project.getDescription(), 4, 30);
             txtDescription.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            txtDescription.setForeground(Color.BLACK); // Added black foreground
+            txtDescription.setForeground(Color.BLACK);
             txtDescription.setLineWrap(true);
             txtDescription.setWrapStyleWord(true);
             JScrollPane scrollDescription = new JScrollPane(txtDescription);
             JTextField txtStartDate = new JTextField(project.getNgayBatDau() != null ? DATE_FORMAT.format(project.getNgayBatDau()) : "", 30);
             txtStartDate.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            txtStartDate.setForeground(Color.BLACK); // Added black foreground
+            txtStartDate.setForeground(Color.BLACK);
             JTextField txtEndDate = new JTextField(project.getNgayKetThuc() != null ? DATE_FORMAT.format(project.getNgayKetThuc()) : "", 30);
             txtEndDate.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            txtEndDate.setForeground(Color.BLACK); // Added black foreground
+            txtEndDate.setForeground(Color.BLACK);
             JTextField txtReportFile = new JTextField(project.getLatestFilePath() != null ? project.getLatestFilePath() : "", 20);
             txtReportFile.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            txtReportFile.setForeground(Color.BLACK); // Added black foreground
+            txtReportFile.setForeground(Color.BLACK);
             txtReportFile.setEditable(false);
 
             JTextArea txtComment = new JTextArea(project.getLatestComment() != null ? project.getLatestComment() : "", 4, 30);
             txtComment.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            txtComment.setForeground(Color.BLACK); // Added black foreground
+            txtComment.setForeground(Color.BLACK);
             txtComment.setLineWrap(true);
             txtComment.setWrapStyleWord(true);
             JScrollPane scrollComment = new JScrollPane(txtComment);
 
             JComboBox<String> cbStudentComboBox = new JComboBox<>();
             cbStudentComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            cbStudentComboBox.setForeground(Color.BLACK); // Added black foreground
+            cbStudentComboBox.setForeground(Color.BLACK);
             StudentDAO studentDAO = new StudentDAO(connection);
             try {
                 List<Student> students = studentDAO.findAll();
@@ -1023,7 +1112,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
 
             JComboBox<String> cbTeacherComboBox = new JComboBox<>();
             cbTeacherComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            cbTeacherComboBox.setForeground(Color.BLACK); // Added black foreground
+            cbTeacherComboBox.setForeground(Color.BLACK);
             TeacherDAO teacherDAO = new TeacherDAO(connection);
             try {
                 List<Teacher> teachers = teacherDAO.findAll();
@@ -1038,21 +1127,21 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
 
             JTextField txtStatus = new JTextField(project.getStatus(), 30);
             txtStatus.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            txtStatus.setForeground(Color.BLACK); // Added black foreground
+            txtStatus.setForeground(Color.BLACK);
             txtStatus.setEditable(false);
             JComboBox<String> cbStatusComboBox = new JComboBox<>(new String[]{"CHO_DUYET", "DUYET", "TU_CHOI", "DA_NOP"});
             cbStatusComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            cbStatusComboBox.setForeground(Color.BLACK); // Added black foreground
+            cbStatusComboBox.setForeground(Color.BLACK);
             cbStatusComboBox.setSelectedItem(project.getStatus());
 
             JButton btnChooseFile = new JButton("Chọn file");
             btnChooseFile.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            btnChooseFile.setBackground(new Color(108, 117, 125)); // Gray for secondary action
-            btnChooseFile.setForeground(Color.BLACK); // Changed to black foreground
+            btnChooseFile.setBackground(new Color(108, 117, 125));
+            btnChooseFile.setForeground(Color.BLACK);
             JButton btnSaveButton = new JButton("Lưu");
             btnSaveButton.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            btnSaveButton.setBackground(new Color(0, 123, 255)); // Blue for primary action
-            btnSaveButton.setForeground(Color.BLACK); // Changed to black foreground
+            btnSaveButton.setBackground(new Color(0, 123, 255));
+            btnSaveButton.setForeground(Color.BLACK);
 
             // Hạn chế chỉnh sửa dựa trên vai trò
             if ("user".equals(loggedUser.getRole())) {
@@ -1085,24 +1174,24 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                 txtComment.setEnabled(false); // Admin chỉ xem nhận xét
             }
 
-            JLabel lblTitle = new JLabel("Tiêu đề:"); // Separate label
-            lblTitle.setForeground(Color.BLACK); // Black foreground
-            JLabel lblDescription = new JLabel("Mô tả:"); // Separate label
-            lblDescription.setForeground(Color.BLACK); // Black foreground
-            JLabel lblStartDate = new JLabel("Ngày bắt đầu (yyyy-MM-dd):"); // Separate label
-            lblStartDate.setForeground(Color.BLACK); // Black foreground
-            JLabel lblEndDate = new JLabel("Ngày kết thúc (yyyy-MM-dd):"); // Separate label
-            lblEndDate.setForeground(Color.BLACK); // Black foreground
-            JLabel lblReportFile = new JLabel("File báo cáo:"); // Separate label
-            lblReportFile.setForeground(Color.BLACK); // Black foreground
-            JLabel lblStudent = new JLabel("Sinh viên:"); // Separate label
-            lblStudent.setForeground(Color.BLACK); // Black foreground
-            JLabel lblTeacher = new JLabel("Giảng viên:"); // Separate label
-            lblTeacher.setForeground(Color.BLACK); // Black foreground
-            JLabel lblStatus = new JLabel("Trạng thái:"); // Separate label
-            lblStatus.setForeground(Color.BLACK); // Black foreground
-            JLabel lblComment = new JLabel("Nhận xét:"); // Separate label
-            lblComment.setForeground(Color.BLACK); // Black foreground
+            JLabel lblTitle = new JLabel("Tiêu đề:");
+            lblTitle.setForeground(Color.BLACK);
+            JLabel lblDescription = new JLabel("Mô tả:");
+            lblDescription.setForeground(Color.BLACK);
+            JLabel lblStartDate = new JLabel("Ngày bắt đầu (yyyy-MM-dd):");
+            lblStartDate.setForeground(Color.BLACK);
+            JLabel lblEndDate = new JLabel("Ngày kết thúc (yyyy-MM-dd):");
+            lblEndDate.setForeground(Color.BLACK);
+            JLabel lblReportFile = new JLabel("File báo cáo:");
+            lblReportFile.setForeground(Color.BLACK);
+            JLabel lblStudent = new JLabel("Sinh viên:");
+            lblStudent.setForeground(Color.BLACK);
+            JLabel lblTeacher = new JLabel("Giảng viên:");
+            lblTeacher.setForeground(Color.BLACK);
+            JLabel lblStatus = new JLabel("Trạng thái:");
+            lblStatus.setForeground(Color.BLACK);
+            JLabel lblComment = new JLabel("Nhận xét:");
+            lblComment.setForeground(Color.BLACK);
 
             gbc.gridx = 0;
             gbc.gridy = 0;
@@ -1288,10 +1377,34 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
 
         int projectId = (int) projectTable.getValueAt(selectedRow, 0);
         String filePath = (String) projectTable.getValueAt(selectedRow, 7);
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "Bạn có chắc chắn muốn xóa đồ án này?", "Xác nhận", JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.YES_OPTION) {
-            try {
+        String projectStatus = (String) projectTable.getValueAt(selectedRow, 6);
+
+        try {
+            Project project = projectDAO.findById(projectId);
+
+            // Kiểm tra quyền xóa cho role user
+            if ("user".equals(loggedUser.getRole())) {
+                StudentDAO studentDAO = new StudentDAO(connection);
+                Student currentStudent = studentDAO.findAll().stream()
+                        .filter(s -> s.getUserId() == loggedUser.getUserId())
+                        .findFirst()
+                        .orElse(null);
+                if (currentStudent == null || project.getStudentId() != currentStudent.getStudentId()) {
+                    JOptionPane.showMessageDialog(this, "Bạn không có quyền xóa đồ án này.",
+                            "Lỗi", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                // Chỉ cho phép xóa khi trạng thái là CHO_DUYET
+                if (!"CHO_DUYET".equals(projectStatus)) {
+                    JOptionPane.showMessageDialog(this, "Chỉ có thể xóa đồ án ở trạng thái 'Chờ duyệt'.",
+                            "Lỗi", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            }
+
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Bạn có chắc chắn muốn xóa đồ án này?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
                 if (filePath != null && !filePath.isEmpty()) {
                     try {
                         EnhancedFileManager.safeDeleteFile(filePath);
@@ -1304,9 +1417,9 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                 }
                 loadProjectsAsync();
                 showNotification("Xóa đồ án thành công!", "success");
-            } catch (SQLException ex) {
-                showNotification("Lỗi: " + ex.getMessage(), "error");
             }
+        } catch (SQLException ex) {
+            showNotification("Lỗi: " + ex.getMessage(), "error");
         }
     }
 
@@ -1335,7 +1448,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
     static class ButtonRenderer extends JButton implements javax.swing.table.TableCellRenderer {
         public ButtonRenderer() {
             setOpaque(true);
-            setForeground(Color.BLACK); // Added black foreground
+            setForeground(Color.BLACK);
         }
 
         @Override
@@ -1356,7 +1469,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             super(checkBox);
             button = new JButton();
             button.setOpaque(true);
-            button.setForeground(Color.BLACK); // Added black foreground
+            button.setForeground(Color.BLACK);
             button.addActionListener(e -> fireEditingStopped());
         }
 
@@ -1391,7 +1504,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
                                                        boolean isSelected, boolean hasFocus, int row, int column) {
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             c.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            c.setForeground(Color.BLACK); // Ensure black foreground for table cells
+            c.setForeground(Color.BLACK);
             if (isSelected) {
                 c.setBackground(table.getSelectionBackground());
                 c.setForeground(table.getSelectionForeground());

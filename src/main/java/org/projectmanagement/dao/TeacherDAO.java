@@ -13,7 +13,7 @@ public class TeacherDAO {
     public TeacherDAO(Connection connection) {
         this.connection = connection;
     }
-
+// Thêm giáo viên vào cơ sở dữ liệu
     public void addTeacher(Teacher teacher) throws SQLException {
         // Kiểm tra email trùng lặp trong bảng users
         UserDAO userDAO = new UserDAO(connection);
@@ -62,7 +62,7 @@ public class TeacherDAO {
             }
         }
     }
-
+// Phương thức tạo username từ email
     private String generateUsername(String email, UserDAO userDAO) throws SQLException {
         // Tạo username từ email, ví dụ: teacher01@vku.edu.vn -> teacher01
         String baseUsername = email.split("@")[0];
@@ -74,7 +74,7 @@ public class TeacherDAO {
         }
         return username;
     }
-
+// Phương thức cập nhật thông tin giáo viên
     public void updateTeacher(Teacher teacher) throws SQLException {
         String sql = "UPDATE teachers SET full_name = ?, email = ?, phone_number = ?, position = ? WHERE teacher_id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {

@@ -30,7 +30,8 @@ public class StudentsPanel extends JPanel {
         initComponents();
         loadStudentsAsync();
     }
-
+// Tạo giao diện người dùng cho panel quản lý sinh viên.
+    // Thiết lập layout, tiêu đề, thanh tìm kiếm, bảng sinh viên và các nút hành động.
     private void initComponents() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
@@ -119,6 +120,11 @@ public class StudentsPanel extends JPanel {
         buttonPanel.add(btnDelete);
         add(buttonPanel, BorderLayout.SOUTH);
     }
+    //Tải danh sách sinh viên từ cơ sở dữ liệu bất đồng bộ (asynchronously) và cập nhật bảng.
+//Sử dụng SwingWorker để thực hiện truy vấn cơ sở dữ liệu trong luồng nền, tránh làm treo giao diện người dùng.
+//Trong doInBackground(), gọi studentDAO.findAll() để lấy toàn bộ danh sách sinh viên.
+//Trong done(), cập nhật bảng bằng cách gọi updateTable() với danh sách sinh viên nhận được.
+//Nếu có lỗi (như InterruptedException hoặc ExecutionException), hiển thị thông báo lỗi qua JOptionPane.
 
     private void loadStudentsAsync() {
         SwingWorker<List<Student>, Void> worker = new SwingWorker<List<Student>, Void>() {
@@ -292,7 +298,11 @@ public class StudentsPanel extends JPanel {
                     JOptionPane.showMessageDialog(this, "Vui lòng điền đầy đủ thông tin.", "Lỗi", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-
+//Regex này kiểm tra email theo định dạng:
+//Bắt đầu bằng một chuỗi ký tự (chữ, số, dấu gạch dưới, dấu chấm, dấu gạch ngang).
+//Tiếp theo là ký tự @.
+//Sau đó là tên miền cấp hai (cũng gồm chữ, số, dấu gạch dưới, dấu chấm, dấu gạch ngang).
+//Kết thúc bằng một dấu chấm và tên miền cấp cao (chỉ chứa chữ cái, độ dài từ 2 đến 6).
                 if (!email.matches("^[\\w.-]+@[\\w.-]+\\.[A-Za-z]{2,6}$")) {
                     JOptionPane.showMessageDialog(this, "Định dạng email không hợp lệ.", "Lỗi", JOptionPane.WARNING_MESSAGE);
                     return;
@@ -303,6 +313,10 @@ public class StudentsPanel extends JPanel {
                     return;
                 }
 
+                //Tạo một đối tượng User với username và email là email người dùng nhập.
+                //Mật khẩu được mã hóa bằng BCrypt với giá trị mặc định "pass123".
+                //Sau khi kiểm tra email chưa tồn tại, tài khoản được đăng ký qua userDAO.registerUser(user).
+                //Thông báo thành công sẽ hiển thị, kèm theo mật khẩu mặc định "pass123".
                 User user = new User();
                 user.setUsername(email);
                 user.setPassword(BCrypt.hashpw("pass123", BCrypt.gensalt()));

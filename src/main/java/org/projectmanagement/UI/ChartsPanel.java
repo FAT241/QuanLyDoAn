@@ -7,15 +7,13 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
-import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.PiePlot3D;
-import org.jfree.chart.renderer.category.BarRenderer;
-import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.general.DefaultPieDataset;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.Connection;
 import java.text.DecimalFormat;
@@ -31,7 +29,7 @@ public class ChartsPanel extends JPanel {
     private JTextField txtSearch;
     private JButton btnSearch, btnReset;
     private ChartPanel pieChartPanel;
-    private ChartPanel barChartPanel;
+    private JTable summaryTable;
 
     public ChartsPanel(User user, Connection connection) {
         this.loggedUser = user;
@@ -63,14 +61,14 @@ public class ChartsPanel extends JPanel {
         btnSearch = new JButton("Tìm kiếm");
         btnSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btnSearch.setBackground(new Color(0, 123, 255));
-        btnSearch.setForeground(Color.BLACK); // Updated to black
+        btnSearch.setForeground(Color.BLACK);
         btnReset = new JButton("Reset");
         btnReset.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btnReset.setBackground(new Color(108, 117, 125));
-        btnReset.setForeground(Color.BLACK); // Updated to black
+        btnReset.setForeground(Color.BLACK);
         btnSearch.addActionListener(e -> searchAndUpdateChart());
         btnReset.addActionListener(e -> {
-            txtSearch.setText(""); // Clear search field
+            txtSearch.setText("");
             loadChartAsync();
         });
         searchPanel.add(searchLabel);
@@ -85,7 +83,7 @@ public class ChartsPanel extends JPanel {
         northPanel.add(searchPanel, BorderLayout.CENTER);
         add(northPanel, BorderLayout.NORTH);
 
-        // Panel chứa hai biểu đồ (xếp dọc)
+        // Panel chứa biểu đồ và bảng tóm tắt
         JPanel chartsContainer = new JPanel();
         chartsContainer.setLayout(new BoxLayout(chartsContainer, BoxLayout.Y_AXIS));
         chartsContainer.setBackground(Color.WHITE);
@@ -101,24 +99,26 @@ public class ChartsPanel extends JPanel {
         ));
         pieChartPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        barChartPanel = new ChartPanel(null);
-        barChartPanel.setBackground(Color.WHITE);
-        barChartPanel.setBorder(BorderFactory.createTitledBorder(
+        // Bảng tóm tắt
+        summaryTable = new JTable();
+        summaryTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        summaryTable.setRowHeight(25);
+        summaryTable.setGridColor(new Color(200, 200, 200));
+        JScrollPane tableScrollPane = new JScrollPane(summaryTable);
+        tableScrollPane.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                "Tình trạng nộp đồ án",
+                "Tóm tắt trạng thái",
                 TitledBorder.CENTER,
                 TitledBorder.TOP,
                 new Font("Segoe UI", Font.BOLD, 16)
         ));
-        barChartPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         chartsContainer.add(Box.createVerticalStrut(10));
         chartsContainer.add(pieChartPanel);
         chartsContainer.add(Box.createVerticalStrut(20));
-        chartsContainer.add(barChartPanel);
+        chartsContainer.add(tableScrollPane);
         chartsContainer.add(Box.createVerticalStrut(10));
 
-        // Thêm vào JScrollPane để cuộn
         JScrollPane scrollPane = new JScrollPane(chartsContainer);
         scrollPane.setBackground(Color.WHITE);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -148,8 +148,8 @@ public class ChartsPanel extends JPanel {
     }
 
     private void searchAndUpdateChart() {
-        String keyword = txtSearch.getText().trim();
-        if (keyword.isEmpty()) {
+        String Nathan = txtSearch.getText().trim();
+        if (Nathan.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập từ khóa tìm kiếm.", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return;
         }
@@ -157,7 +157,7 @@ public class ChartsPanel extends JPanel {
             @Override
             protected List<Project> doInBackground() throws Exception {
                 synchronized (projectDAO) {
-                    return projectDAO.searchByTitleOrStudentId(keyword);
+                    return projectDAO.searchByTitleOrStudentId(Nathan);
                 }
             }
 
@@ -199,7 +199,7 @@ public class ChartsPanel extends JPanel {
             pieDataset.setValue(pieLabels[i], statusCount.getOrDefault(statuses[i], 0L));
         }
 
-        JFreeChart pieChart = ChartFactory.createPieChart3D(
+        JFreeChart pieChart = ChartFactory.createPieChart(
                 "",
                 pieDataset,
                 true,
@@ -207,7 +207,7 @@ public class ChartsPanel extends JPanel {
                 false
         );
 
-        PiePlot3D piePlot = (PiePlot3D) pieChart.getPlot();
+        PiePlot piePlot = (PiePlot) pieChart.getPlot();
         piePlot.setBackgroundPaint(Color.WHITE);
         piePlot.setOutlinePaint(null);
         piePlot.setLabelFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -228,39 +228,20 @@ public class ChartsPanel extends JPanel {
         pieChartPanel.setChart(pieChart);
         pieChartPanel.setPreferredSize(new Dimension(450, 350));
 
-        // --- Bar Chart: Đã nộp vs Chưa nộp ---
-        long submittedCount = statusCount.getOrDefault("DA_NOP", 0L);
-        long notSubmittedCount = projects.size() - submittedCount;
-
-        DefaultCategoryDataset barDataset = new DefaultCategoryDataset();
-        barDataset.addValue(submittedCount, "Số lượng", "Đã nộp");
-        barDataset.addValue(notSubmittedCount, "Số lượng", "Chưa nộp");
-
-        JFreeChart barChart = ChartFactory.createBarChart(
-                "",
-                "",
-                "Số lượng",
-                barDataset
+        // --- Bảng tóm tắt ---
+        DefaultTableModel tableModel = new DefaultTableModel(
+                new String[]{"Trạng thái", "Số lượng", "Tỷ lệ"}, 0
         );
-
-        CategoryPlot barPlot = barChart.getCategoryPlot();
-        barPlot.setBackgroundPaint(Color.WHITE);
-        barPlot.setDomainGridlinePaint(new Color(200, 200, 200));
-        barPlot.setRangeGridlinePaint(new Color(200, 200, 200));
-
-        BarRenderer renderer = (BarRenderer) barPlot.getRenderer();
-        renderer.setSeriesPaint(0, new Color(75, 192, 192)); // Đã nộp: xanh lá
-        renderer.setSeriesPaint(1, new Color(108, 117, 125)); // Chưa nộp: xám
-        renderer.setDrawBarOutline(true);
-        renderer.setItemMargin(0.2);
-
-        barChart.getLegend().setItemFont(new Font("Segoe UI", Font.PLAIN, 14));
-        barChart.getCategoryPlot().getDomainAxis().setLabelFont(new Font("Segoe UI", Font.PLAIN, 14));
-        barChart.getCategoryPlot().getRangeAxis().setLabelFont(new Font("Segoe UI", Font.PLAIN, 14));
-        barChart.getCategoryPlot().getDomainAxis().setTickLabelFont(new Font("Segoe UI", Font.PLAIN, 12));
-        barChart.getCategoryPlot().getRangeAxis().setTickLabelFont(new Font("Segoe UI", Font.PLAIN, 12));
-
-        barChartPanel.setChart(barChart);
-        barChartPanel.setPreferredSize(new Dimension(450, 350));
+        long total = projects.size();
+        for (int i = 0; i < statuses.length; i++) {
+            long count = statusCount.getOrDefault(statuses[i], 0L);
+            double percentage = total > 0 ? (count * 100.0 / total) : 0;
+            tableModel.addRow(new Object[]{
+                    pieLabels[i],
+                    count,
+                    String.format("%.1f%%", percentage)
+            });
+        }
+        summaryTable.setModel(tableModel);
     }
 }

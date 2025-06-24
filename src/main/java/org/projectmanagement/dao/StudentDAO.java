@@ -13,7 +13,7 @@ public class StudentDAO {
     public StudentDAO(Connection connection) {
         this.connection = connection;
     }
-
+// Phương thức thêm sinh viên
     public void addStudent(Student student, int userId) throws SQLException {
         String sql = "INSERT INTO students (full_name, email, phone_number, major, class_code, user_id) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -33,7 +33,7 @@ public class StudentDAO {
             }
         }
     }
-
+// Phương thức cập nhật thông tin sinh viên
     public void updateStudent(Student student) throws SQLException {
         String sql = "UPDATE students SET full_name = ?, email = ?, phone_number = ?, major = ?, class_code = ?, user_id = ? WHERE student_id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -47,7 +47,7 @@ public class StudentDAO {
             pstmt.executeUpdate();
         }
     }
-
+// Phương thức xóa sinh viên
     public void deleteStudent(int id) throws SQLException {
         String sql = "DELETE FROM students WHERE student_id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -55,7 +55,7 @@ public class StudentDAO {
             pstmt.executeUpdate();
         }
     }
-
+// Phương thức tìm kiếm sinh viên theo ID
     public Student findById(int id) throws SQLException {
         String sql = "SELECT * FROM students WHERE student_id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -76,7 +76,7 @@ public class StudentDAO {
         }
         return null;
     }
-
+// Phương thức lấy danh sách tất cả sinh viên
     public List<Student> findAll() throws SQLException {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT * FROM students";
