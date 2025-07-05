@@ -22,9 +22,9 @@ public class EnhancedFileManager {
     public static class FileConfig {
         public static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
         public static final Set<String> ALLOWED_EXTENSIONS = Set.of(".pdf"); // Chỉ chấp nhận .pdf
-        public static final String REPORTS_DIR = "reports";
-        public static final String TEMP_DIR = "temp";
-        public static final String BACKUP_DIR = "backup";
+        public static final String REPORTS_DIR = "reports";// đường dẫn thư mục lưu trữ báo cáo
+        public static final String TEMP_DIR = "temp"; // đường dẫn thư mục tạm thời
+        public static final String BACKUP_DIR = "backup"; // đường dẫn thư mục backup
         public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd_HHmmss");
     }
 
@@ -46,7 +46,6 @@ public class EnhancedFileManager {
             this.fileHash = fileHash;
             this.error = error;
         }
-
         public static FileUploadResult success(String filePath, String fileName, long fileSize, String hash) {
             return new FileUploadResult(true, filePath, fileName, fileSize, hash, null);
         }
@@ -92,6 +91,8 @@ public class EnhancedFileManager {
     /**
      * Upload file với validation và progress tracking
      */
+    //  Multithreading Sử dụng CompletableFuture.supplyAsync()
+    //  để thực hiện quá trình tải lên trong một luồng riêng biệt.
     public static CompletableFuture<FileUploadResult> uploadFileAsync(
             String sourceFilePath,
             ProgressCallback callback) {

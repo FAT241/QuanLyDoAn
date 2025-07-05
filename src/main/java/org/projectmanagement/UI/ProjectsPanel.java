@@ -50,7 +50,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
         initComponents();
         loadProjectsAsync();
     }
-
+// Khởi tạo socket client để lắng nghe các sự kiện từ server
     private void initSocketClient() {
         try {
             socketClient = new ProjectSocketClient();
@@ -79,7 +79,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
             onDisconnected();
         }
     }
-
+// Phương thức khởi tạo giao diện người dùng
     private void initComponents() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
@@ -96,7 +96,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
         // Status panel
         JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         statusPanel.setBackground(Color.WHITE);
-        statusLabel = new JLabel(isSocketConnected ? "🟢 Kết nối" : "🔴 Mất kết nối");
+        statusLabel = new JLabel(isSocketConnected ? "Kết nối" : "Mất kết nối");
         statusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         statusLabel.setForeground(isSocketConnected ? Color.GREEN : Color.RED);
         statusPanel.add(statusLabel);
@@ -213,7 +213,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
     public void onConnected() {
         SwingUtilities.invokeLater(() -> {
             isSocketConnected = true;
-            statusLabel.setText("🟢 Kết nối");
+            statusLabel.setText("Kết nối");
             statusLabel.setForeground(Color.GREEN);
         });
     }
@@ -222,7 +222,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
     public void onDisconnected() {
         SwingUtilities.invokeLater(() -> {
             isSocketConnected = false;
-            statusLabel.setText("🔴 Mất kết nối");
+            statusLabel.setText("Mất kết nối");
             statusLabel.setForeground(Color.RED);
             showNotification("Mất kết nối với server", "error");
         });
@@ -283,7 +283,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
         timer.start();
         dialog.setVisible(true);
     }
-
+//Sử dụng SwingWorker để thực hiện truy vấn cơ sở dữ liệu trong thread nền, đảm bảo UI vẫn phản hồi.
     private void loadProjectsAsync() {
         SwingWorker<List<Project>, Void> worker = new SwingWorker<List<Project>, Void>() {
             @Override
@@ -1009,6 +1009,7 @@ public class ProjectsPanel extends JPanel implements SocketEventListener {
 
         uploadWorker.execute();
     }
+
     private String tryGetAlternativeFilePath(Object result, String originalFilePath) {
         try {
             // Thử reflection để lấy các field khác của result object

@@ -6,7 +6,7 @@ import org.projectmanagement.models.User;
 import javax.swing.*;
 import java.awt.*;
 import java.sql.Connection;
-import java.sql.SQLException; // Thêm import này
+import java.sql.SQLException;
 import javax.swing.border.EmptyBorder;
 
 public class ChangePasswordPanel extends JPanel {
@@ -18,6 +18,11 @@ public class ChangePasswordPanel extends JPanel {
     private JPasswordField txtConfirmPassword;
     private JButton btnChange;
     private JLabel lblMessage;
+
+    // Colors from MainPanel.java for consistency
+    private static final Color TEXT_PRIMARY = new Color(33, 41, 60);
+    private static final Color TEXT_SECONDARY = new Color(107, 124, 147);
+    private static final Color ACCENT_COLOR = new Color(79, 172, 254);
 
     public ChangePasswordPanel(User user, Connection connection) {
         this.loggedUser = user;
@@ -31,27 +36,66 @@ public class ChangePasswordPanel extends JPanel {
         setBackground(Color.WHITE);
 
         JLabel title = new JLabel("Đổi Mật Khẩu", JLabel.CENTER);
-        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        title.setBorder(new EmptyBorder(10, 0, 10, 0));
+        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        title.setForeground(TEXT_PRIMARY);
+        title.setBorder(new EmptyBorder(20, 0, 20, 0));
         add(title, BorderLayout.NORTH);
 
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBackground(Color.WHITE);
+        formPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(15, 15, 15, 15);
 
         JLabel lblOldPassword = new JLabel("Mật khẩu cũ:");
+        lblOldPassword.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblOldPassword.setForeground(TEXT_PRIMARY);
         txtOldPassword = new JPasswordField(20);
+        txtOldPassword.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
         JLabel lblNewPassword = new JLabel("Mật khẩu mới:");
+        lblNewPassword.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblNewPassword.setForeground(TEXT_PRIMARY);
         txtNewPassword = new JPasswordField(20);
+        txtNewPassword.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
         JLabel lblConfirmPassword = new JLabel("Xác nhận mật khẩu:");
+        lblConfirmPassword.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblConfirmPassword.setForeground(TEXT_PRIMARY);
         txtConfirmPassword = new JPasswordField(20);
+        txtConfirmPassword.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
-        btnChange = new JButton("Đổi mật khẩu");
+        btnChange = new JButton("Đổi mật khẩu") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                Color color = ACCENT_COLOR;
+                if (getModel().isPressed()) {
+                    color = new Color(color.getRed(), color.getGreen(), color.getBlue(), 180);
+                } else if (getModel().isRollover()) {
+                    color = new Color(color.getRed(), color.getGreen(), color.getBlue(), 220);
+                }
+
+                g2.setColor(color);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        btnChange.setForeground(Color.WHITE);
+        btnChange.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnChange.setFocusPainted(false);
+        btnChange.setBorderPainted(false);
+        btnChange.setContentAreaFilled(false);
+        btnChange.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnChange.setPreferredSize(new Dimension(160, 40));
+
         lblMessage = new JLabel(" ");
+        lblMessage.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblMessage.setForeground(Color.RED);
+        lblMessage.setHorizontalAlignment(SwingConstants.CENTER);
 
         // Mật khẩu cũ
         gbc.gridx = 0;
@@ -84,8 +128,9 @@ public class ChangePasswordPanel extends JPanel {
         formPanel.add(txtConfirmPassword, gbc);
 
         // Nút đổi
-        gbc.gridx = 1;
+        gbc.gridx = 0;
         gbc.gridy = 3;
+        gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         formPanel.add(btnChange, gbc);
 

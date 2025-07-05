@@ -113,7 +113,7 @@ public class TeacherDAO {
         }
         return null;
     }
-
+//
     public List<Teacher> findAll() throws SQLException {
         List<Teacher> teachers = new ArrayList<>();
         String sql = "SELECT * FROM teachers";

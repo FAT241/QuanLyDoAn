@@ -36,7 +36,7 @@ public class GradesPanel extends JPanel {
         initComponents();
         loadGradesAsync();
     }
-
+// Initializes the UI components for the GradesPanel
     private void initComponents() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
@@ -123,7 +123,11 @@ public class GradesPanel extends JPanel {
 
         add(buttonPanel, BorderLayout.SOUTH);
     }
-
+    //Tải điểm số dự án bất đồng bộ bằng SwingWorker.
+    //Lọc dữ liệu dựa trên vai trò người dùng:
+    //Giáo viên: Chỉ hiển thị dự án của giáo viên đó.
+    //Sinh viên: Chỉ hiển thị dự án của sinh viên đó.
+    //Admin: Hiển thị tất cả dự án.
     private void loadGradesAsync() {
         // Disable buttons to prevent multiple operations
         setButtonsEnabled(false);
@@ -183,7 +187,7 @@ public class GradesPanel extends JPanel {
         };
         worker.execute();
     }
-
+//Tìm kiếm dự án bất đồng bộ dựa trên từ khóa (tiêu đề hoặc ID sinh viên).
     private void searchGrades() {
         String keyword = txtSearch.getText().trim();
         if (keyword.isEmpty()) {
@@ -252,7 +256,8 @@ public class GradesPanel extends JPanel {
         };
         worker.execute();
     }
-
+//Cập nhật bảng giao diện với danh sách dự án.
+//Tạo dữ liệu bảng với các cột: ID, Tên đồ án, Điểm Quá Trình, Điểm Bảo Vệ, Điểm Tổng Kết, Xếp Loại.
     private void updateTable(List<Project> projects) {
         String[] columns = {"ID", "Tên Đồ án", "Điểm Quá Trình", "Điểm Bảo Vệ", "Điểm Tổng Kết", "Xếp Loại"};
         Object[][] data = new Object[projects.size()][6];
@@ -282,7 +287,10 @@ public class GradesPanel extends JPanel {
         gradesTable.getColumnModel().getColumn(0).setMaxWidth(0);
         gradesTable.getColumnModel().getColumn(0).setWidth(0);
     }
-
+//Hiển thị hộp thoại để thêm điểm số cho dự án.
+//Kiểm tra quyền (giáo viên chỉ thêm điểm cho dự án của mình).
+//Cho phép chọn dự án từ danh sách hiện tại, nhập điểm Quá Trình và Bảo Vệ (0-10).
+//Lưu điểm vào cơ sở dữ liệu, thông báo thành công/thất bại và làm mới bảng.
     private void showAddScoreDialog() {
         // Check if there are any projects displayed
         if (currentProjects.isEmpty()) {
@@ -455,7 +463,10 @@ public class GradesPanel extends JPanel {
 
         dialog.setVisible(true);
     }
-
+//Hiển thị hộp thoại để sửa điểm số cho dự án được chọn trong bảng.
+//Kiểm tra quyền và lấy dữ liệu mới từ cơ sở dữ liệu.
+//Hiển thị tiêu đề dự án (không chỉnh sửa được) và điểm hiện tại, cho phép cập nhật điểm Quá Trình/Bảo Vệ.
+//Lưu thay đổi, thông báo kết quả và làm mới bảng.
     private void showEditScoreDialog() {
         int selectedRow = gradesTable.getSelectedRow();
         if (selectedRow == -1) {

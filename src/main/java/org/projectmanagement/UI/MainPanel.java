@@ -33,7 +33,7 @@ public class MainPanel extends JPanel {
     private static final Color CONTENT_COLOR = new Color(248, 250, 252);
     private static final Color TEXT_PRIMARY = new Color(33, 41, 60);
     private static final Color TEXT_SECONDARY = new Color(107, 124, 147);
-    private static final Color ACCENT_COLOR = new Color(79, 172, 254);
+    private static final Color ACCENT_COLOR = new Color(79, 172, 254); // Màu avatar và button chính
     private static final Color BUTTON_PRIMARY = new Color(79, 172, 254);
     private static final Color BUTTON_SUCCESS = new Color(40, 167, 69);
     private static final Color BUTTON_WARNING = new Color(255, 193, 7);
@@ -61,7 +61,7 @@ public class MainPanel extends JPanel {
         // Content panel with modern styling
         contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(CONTENT_COLOR);
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 8, 20, 20));
 
         // Add initial content
         onMenuSelected("Projects");
@@ -93,7 +93,7 @@ public class MainPanel extends JPanel {
 
     private JPanel createModernSidebar() {
         JPanel sidebar = new JPanel();
-        sidebar.setPreferredSize(new Dimension(260, 0));
+        sidebar.setPreferredSize(new Dimension(320, 0)); // Increased from 300 to 320
         sidebar.setBackground(SIDEBAR_COLOR);
         sidebar.setLayout(new BorderLayout());
 
@@ -119,24 +119,14 @@ public class MainPanel extends JPanel {
     private JPanel createLogoPanel() {
         JPanel logoPanel = new JPanel();
         logoPanel.setBackground(SIDEBAR_COLOR);
-        logoPanel.setPreferredSize(new Dimension(260, 120));
+        logoPanel.setPreferredSize(new Dimension(320, 160)); // Tăng height để có không gian cho logo
         logoPanel.setLayout(new BorderLayout());
-        logoPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        logoPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // Logo container
-        JPanel logoContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        // Logo container với layout tốt hơn
+        JPanel logoContainer = new JPanel(new BorderLayout());
         logoContainer.setBackground(SIDEBAR_COLOR);
-
-        // App title
-        JLabel appTitle = new JLabel("VKU Project");
-        appTitle.setForeground(Color.WHITE);
-        appTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        appTitle.setHorizontalAlignment(SwingConstants.CENTER);
-
-        JLabel appSubtitle = new JLabel("Management System");
-        appSubtitle.setForeground(TEXT_SECONDARY);
-        appSubtitle.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        appSubtitle.setHorizontalAlignment(SwingConstants.CENTER);
+        logoContainer.setPreferredSize(new Dimension(290, 100));
 
         // Try to load logo
         String logoPath = "/logo_vku.png";
@@ -145,24 +135,54 @@ public class MainPanel extends JPanel {
             if (logoURL != null) {
                 Image logo = ImageIO.read(logoURL);
                 if (logo != null) {
-                    logo = logo.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+                    // Tính toán kích thước logo mới với tỷ lệ phù hợp
+                    int originalWidth = logo.getWidth(null);
+                    int originalHeight = logo.getHeight(null);
+
+                    // Đặt kích thước tối đa cho logo (tăng chiều ngang)
+                    int maxWidth = 240;  // Doubled from 120
+                    int maxHeight = 160;  // Doubled from 80
+
+                    // Tính tỷ lệ scale để giữ nguyên aspect ratio
+                    double scaleX = (double) maxWidth / originalWidth;
+                    double scaleY = (double) maxHeight / originalHeight;
+                    double scale = Math.min(scaleX, scaleY);
+
+                    int newWidth = (int) (originalWidth * scale);
+                    int newHeight = (int) (originalHeight * scale);
+
+                    logo = logo.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
                     JLabel lblLogo = new JLabel(new ImageIcon(logo));
-                    logoContainer.add(lblLogo);
+                    lblLogo.setHorizontalAlignment(SwingConstants.CENTER);
+                    logoContainer.add(lblLogo, BorderLayout.CENTER);
                 }
             }
         } catch (IOException e) {
-            // Use text logo if image not found
-            JLabel textLogo = new JLabel("VKU");
+            // Use text logo if image not found với kích thước lớn hơn
+            JLabel textLogo = new JLabel("VKU", SwingConstants.CENTER);
             textLogo.setForeground(ACCENT_COLOR);
-            textLogo.setFont(new Font("Segoe UI", Font.BOLD, 24));
-            logoContainer.add(textLogo);
+            textLogo.setFont(new Font("Segoe UI", Font.BOLD, 36)); // Tăng từ 32 lên 36
+            logoContainer.add(textLogo, BorderLayout.CENTER);
         }
 
         logoPanel.add(logoContainer, BorderLayout.NORTH);
 
+        // Title panel với spacing tốt hơn
         JPanel titlePanel = new JPanel();
         titlePanel.setBackground(SIDEBAR_COLOR);
         titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.Y_AXIS));
+
+        JLabel appTitle = new JLabel("VKU Project");
+        appTitle.setForeground(Color.WHITE);
+        appTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        appTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel appSubtitle = new JLabel("Management System");
+        appSubtitle.setForeground(TEXT_SECONDARY);
+        appSubtitle.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        appSubtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        titlePanel.add(Box.createVerticalStrut(10)); // Spacing trước title
         titlePanel.add(appTitle);
         titlePanel.add(Box.createVerticalStrut(5));
         titlePanel.add(appSubtitle);
@@ -178,13 +198,12 @@ public class MainPanel extends JPanel {
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
         menuPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
 
-        // Menu items with icons
+        // Menu items
         String[] menuItems = {"Projects", "Students", "Teachers", "Grades", "Charts", "Change Password"};
-        String[] menuIcons = {"📁", "👥", "👨‍🏫", "📊", "📈", "🔐"};
 
-        for (int i = 0; i < menuItems.length; i++) {
-            JButton menuButton = createModernMenuButton(menuItems[i], menuIcons[i]);
-            menuButtons.put(menuItems[i], menuButton);
+        for (String menuItem : menuItems) {
+            JButton menuButton = createModernMenuButton(menuItem);
+            menuButtons.put(menuItem, menuButton);
             menuPanel.add(menuButton);
             menuPanel.add(Box.createVerticalStrut(5));
         }
@@ -207,7 +226,7 @@ public class MainPanel extends JPanel {
         return footer;
     }
 
-    private JButton createModernMenuButton(String title, String icon) {
+    private JButton createModernMenuButton(String title) {
         JButton button = new JButton() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -236,10 +255,10 @@ public class MainPanel extends JPanel {
             }
         };
 
-        button.setText("  " + icon + "  " + title);
+        button.setText(title);
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        button.setMaximumSize(new Dimension(240, 45));
-        button.setPreferredSize(new Dimension(240, 45));
+        button.setMaximumSize(new Dimension(300, 45)); // Adjusted to match sidebar width
+        button.setPreferredSize(new Dimension(300, 45)); // Adjusted to match sidebar width
         button.setForeground(Color.WHITE);
         button.setBackground(SIDEBAR_COLOR);
         button.setFocusPainted(false);
@@ -370,7 +389,7 @@ public class MainPanel extends JPanel {
         userPanel.add(btnLogout);
         return userPanel;
     }
-
+// Tạo avatar cho người dùng
     private void setUserAvatar(String avatarPath) {
         try {
             Image avatarImg;
@@ -382,7 +401,7 @@ public class MainPanel extends JPanel {
                 BufferedImage defaultAvatar = new BufferedImage(50, 50, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2 = defaultAvatar.createGraphics();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(ACCENT_COLOR);
+                g2.setColor(ACCENT_COLOR); // Use accent color for default avatar
                 g2.fillOval(0, 0, 50, 50);
                 g2.setColor(Color.WHITE);
                 g2.setFont(new Font("Segoe UI", Font.BOLD, 20));
@@ -468,11 +487,6 @@ public class MainPanel extends JPanel {
         centerPanel.setBackground(Color.WHITE);
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
-        // Icon
-        JLabel iconLabel = new JLabel("🔒");
-        iconLabel.setFont(new Font("Segoe UI", Font.PLAIN, 48));
-        iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         // Title
         JLabel titleLabel = new JLabel("Access Denied");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
@@ -486,8 +500,6 @@ public class MainPanel extends JPanel {
         messageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         centerPanel.add(Box.createVerticalGlue());
-        centerPanel.add(iconLabel);
-        centerPanel.add(Box.createVerticalStrut(20));
         centerPanel.add(titleLabel);
         centerPanel.add(Box.createVerticalStrut(10));
         centerPanel.add(messageLabel);
@@ -537,15 +549,15 @@ public class MainPanel extends JPanel {
         statsPanel.setMaximumSize(new Dimension(800, 120));
 
         // Sample stats cards
-        statsPanel.add(createStatCard("📁", "Projects", "12", ACCENT_COLOR));
-        statsPanel.add(createStatCard("👥", "Students", "156", new Color(40, 167, 69)));
-        statsPanel.add(createStatCard("👨‍🏫", "Teachers", "23", new Color(255, 193, 7)));
-        statsPanel.add(createStatCard("📊", "Grades", "1,204", new Color(220, 53, 69)));
+        statsPanel.add(createStatCard("Projects", "12", ACCENT_COLOR));
+        statsPanel.add(createStatCard("Students", "156", new Color(40, 167, 69)));
+        statsPanel.add(createStatCard("Teachers", "23", new Color(255, 193, 7)));
+        statsPanel.add(createStatCard("Grades", "1,204", new Color(220, 53, 69)));
 
         return statsPanel;
     }
 
-    private JPanel createStatCard(String icon, String title, String value, Color color) {
+    private JPanel createStatCard(String title, String value, Color color) {
         JPanel card = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -554,8 +566,12 @@ public class MainPanel extends JPanel {
 
                 // Background with gradient
                 GradientPaint gradient = new GradientPaint(
-                        0, 0, new Color(color.getRed(), color.getGreen(), color.getBlue(), 20),
-                        0, getHeight(), new Color(color.getRed(), color.getGreen(), color.getBlue(), 40)
+                        0,
+                        0,
+                        new Color(color.getRed(), color.getGreen(), color.getBlue(), 20),
+                        0,
+                        getHeight(),
+                        new Color(color.getRed(), color.getGreen(), color.getBlue(), 40)
                 );
                 g2.setPaint(gradient);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
@@ -574,11 +590,6 @@ public class MainPanel extends JPanel {
         card.setOpaque(false);
         card.setPreferredSize(new Dimension(180, 120));
         card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        // Icon
-        JLabel iconLabel = new JLabel(icon);
-        iconLabel.setFont(new Font("Segoe UI", Font.PLAIN, 32));
-        iconLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         // Content
         JPanel contentPanel = new JPanel();
@@ -599,7 +610,6 @@ public class MainPanel extends JPanel {
         contentPanel.add(Box.createVerticalStrut(5));
         contentPanel.add(titleLabel);
 
-        card.add(iconLabel, BorderLayout.NORTH);
         card.add(contentPanel, BorderLayout.CENTER);
 
         return card;

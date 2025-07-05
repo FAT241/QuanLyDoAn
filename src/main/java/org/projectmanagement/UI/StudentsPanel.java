@@ -8,7 +8,10 @@ import org.projectmanagement.models.User;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -20,6 +23,8 @@ public class StudentsPanel extends JPanel {
     private Connection connection;
     private StudentDAO studentDAO;
     private JTable studentTable;
+    private DefaultTableModel tableModel;
+    private TableRowSorter<DefaultTableModel> sorter;
     private JButton btnAdd, btnEdit, btnDelete, btnSearch, btnReset;
     private JTextField txtSearch;
 
@@ -30,8 +35,7 @@ public class StudentsPanel extends JPanel {
         initComponents();
         loadStudentsAsync();
     }
-// Tạo giao diện người dùng cho panel quản lý sinh viên.
-    // Thiết lập layout, tiêu đề, thanh tìm kiếm, bảng sinh viên và các nút hành động.
+
     private void initComponents() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
@@ -41,7 +45,6 @@ public class StudentsPanel extends JPanel {
         title.setFont(new Font("Segoe UI", Font.BOLD, 24));
         title.setForeground(Color.BLACK);
         title.setBorder(new EmptyBorder(10, 0, 10, 0));
-        add(title, BorderLayout.NORTH);
 
         // Thanh tìm kiếm
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -68,7 +71,7 @@ public class StudentsPanel extends JPanel {
         btnSearch.addActionListener(e -> searchStudents());
         btnReset.addActionListener(e -> {
             txtSearch.setText("");
-            loadStudentsAsync();
+            loadStudentsAsync(); // Reload all data instead of just clearing filter
         });
 
         searchPanel.add(searchLabel);
@@ -76,8 +79,22 @@ public class StudentsPanel extends JPanel {
         searchPanel.add(btnSearch);
         searchPanel.add(btnReset);
 
+        // Container for title and search panel (giống TeachersPanel)
+        JPanel northPanel = new JPanel(new BorderLayout());
+        northPanel.setBackground(Color.WHITE);
+        northPanel.add(title, BorderLayout.NORTH);
+        northPanel.add(searchPanel, BorderLayout.CENTER);
+        add(northPanel, BorderLayout.NORTH);
+
         // Bảng sinh viên
-        studentTable = new JTable();
+        String[] columns = {"ID", "Tên", "Email", "Số điện thoại", "Chuyên ngành", "Mã lớp"};
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        studentTable = new JTable(tableModel);
         studentTable.setRowHeight(30);
         studentTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         studentTable.setForeground(Color.BLACK);
@@ -88,6 +105,11 @@ public class StudentsPanel extends JPanel {
         studentTable.getTableHeader().setBackground(new Color(230, 230, 230));
         studentTable.getTableHeader().setReorderingAllowed(false);
         studentTable.setDefaultRenderer(Object.class, new CustomTableCellRenderer());
+
+        // Initialize sorter for real-time filtering
+        sorter = new TableRowSorter<>(tableModel);
+        studentTable.setRowSorter(sorter);
+
         JScrollPane scrollPane = new JScrollPane(studentTable);
         add(scrollPane, BorderLayout.CENTER);
 
@@ -119,12 +141,38 @@ public class StudentsPanel extends JPanel {
         buttonPanel.add(btnEdit);
         buttonPanel.add(btnDelete);
         add(buttonPanel, BorderLayout.SOUTH);
+
+        // Add real-time search listener
+        addSearchListener();
     }
-    //Tải danh sách sinh viên từ cơ sở dữ liệu bất đồng bộ (asynchronously) và cập nhật bảng.
-//Sử dụng SwingWorker để thực hiện truy vấn cơ sở dữ liệu trong luồng nền, tránh làm treo giao diện người dùng.
-//Trong doInBackground(), gọi studentDAO.findAll() để lấy toàn bộ danh sách sinh viên.
-//Trong done(), cập nhật bảng bằng cách gọi updateTable() với danh sách sinh viên nhận được.
-//Nếu có lỗi (như InterruptedException hoặc ExecutionException), hiển thị thông báo lỗi qua JOptionPane.
+
+    private void addSearchListener() {
+        txtSearch.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                filterTable();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                filterTable();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                filterTable();
+            }
+        });
+    }
+
+    private void filterTable() {
+        String text = txtSearch.getText().trim();
+        if (text.isEmpty()) {
+            sorter.setRowFilter(null);
+        } else {
+            sorter.setRowFilter(RowFilter.regexFilter("(?i)" + text, 1, 2)); // Search in "Tên" and "Email" columns
+        }
+    }
 
     private void loadStudentsAsync() {
         SwingWorker<List<Student>, Void> worker = new SwingWorker<List<Student>, Void>() {
@@ -148,6 +196,7 @@ public class StudentsPanel extends JPanel {
         worker.execute();
     }
 
+    // Cải thiện phương thức searchStudents giống TeachersPanel
     private void searchStudents() {
         String keyword = txtSearch.getText().trim();
         if (keyword.isEmpty()) {
@@ -178,6 +227,7 @@ public class StudentsPanel extends JPanel {
         worker.execute();
     }
 
+    // Cải thiện phương thức updateTable giống TeachersPanel
     private void updateTable(List<Student> students) {
         String[] columns = {"ID", "Tên", "Email", "Số điện thoại", "Chuyên ngành", "Mã lớp"};
         Object[][] data = new Object[students.size()][6];
@@ -198,20 +248,25 @@ public class StudentsPanel extends JPanel {
                 return false;
             }
         };
+        tableModel = model;
         studentTable.setModel(model);
+
+        // Reinitialize sorter after updating table model
+        sorter = new TableRowSorter<>(tableModel);
+        studentTable.setRowSorter(sorter);
     }
 
     private void showAddStudentDialog() {
         JDialog dialog = new JDialog();
         dialog.setTitle("Thêm sinh viên");
-        dialog.setSize(600, 500); // Increased size to match ProjectsPanel
+        dialog.setSize(600, 500);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new GridBagLayout());
         dialog.setBackground(Color.WHITE);
-        ((JComponent) dialog.getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Added padding
+        ((JComponent) dialog.getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10); // Consistent insets
+        gbc.insets = new Insets(10, 10, 10, 10);
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
@@ -298,28 +353,20 @@ public class StudentsPanel extends JPanel {
                     JOptionPane.showMessageDialog(this, "Vui lòng điền đầy đủ thông tin.", "Lỗi", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-//Regex này kiểm tra email theo định dạng:
-//Bắt đầu bằng một chuỗi ký tự (chữ, số, dấu gạch dưới, dấu chấm, dấu gạch ngang).
-//Tiếp theo là ký tự @.
-//Sau đó là tên miền cấp hai (cũng gồm chữ, số, dấu gạch dưới, dấu chấm, dấu gạch ngang).
-//Kết thúc bằng một dấu chấm và tên miền cấp cao (chỉ chứa chữ cái, độ dài từ 2 đến 6).
+
                 if (!email.matches("^[\\w.-]+@[\\w.-]+\\.[A-Za-z]{2,6}$")) {
                     JOptionPane.showMessageDialog(this, "Định dạng email không hợp lệ.", "Lỗi", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
-                if (!phoneNumber.matches("\\d{9,12}")) {
+                if (!phoneNumber.matches("\\d{10,12}$")) {
                     JOptionPane.showMessageDialog(this, "Số điện thoại không hợp lệ.", "Lỗi", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-
-                //Tạo một đối tượng User với username và email là email người dùng nhập.
-                //Mật khẩu được mã hóa bằng BCrypt với giá trị mặc định "pass123".
-                //Sau khi kiểm tra email chưa tồn tại, tài khoản được đăng ký qua userDAO.registerUser(user).
-                //Thông báo thành công sẽ hiển thị, kèm theo mật khẩu mặc định "pass123".
+                // Tạo tai khoan dang nhap voi mat khau mac dinh là pass123
                 User user = new User();
                 user.setUsername(email);
-                user.setPassword(BCrypt.hashpw("pass123", BCrypt.gensalt()));
+                user.setPassword(BCrypt.hashpw("pass123", BCrypt.gensalt())); //// Hàm băm BCrypt
                 user.setEmail(email);
                 user.setFullName(fullName);
                 user.setRole("user");
@@ -385,14 +432,14 @@ public class StudentsPanel extends JPanel {
             }
             JDialog dialog = new JDialog();
             dialog.setTitle("Sửa sinh viên");
-            dialog.setSize(600, 500); // Increased size to match ProjectsPanel
+            dialog.setSize(600, 500);
             dialog.setLocationRelativeTo(this);
             dialog.setLayout(new GridBagLayout());
             dialog.setBackground(Color.WHITE);
-            ((JComponent) dialog.getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Added padding
+            ((JComponent) dialog.getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
             GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(10, 10, 10, 10); // Consistent insets
+            gbc.insets = new Insets(10, 10, 10, 10);
             gbc.anchor = GridBagConstraints.WEST;
             gbc.fill = GridBagConstraints.HORIZONTAL;
 
@@ -491,7 +538,7 @@ public class StudentsPanel extends JPanel {
                         return;
                     }
 
-                    if (!phoneNumber.matches("\\d{9,12}")) {
+                    if (!phoneNumber.matches("\\d{10,12}$")) {
                         JOptionPane.showMessageDialog(this, "Số điện thoại không hợp lệ.", "Lỗi", JOptionPane.WARNING_MESSAGE);
                         return;
                     }
@@ -533,7 +580,7 @@ public class StudentsPanel extends JPanel {
             });
 
             dialog.setVisible(true);
-        } catch (Exception ex) {
+        } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }

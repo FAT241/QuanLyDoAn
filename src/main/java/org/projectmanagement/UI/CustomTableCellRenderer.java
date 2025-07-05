@@ -16,16 +16,17 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
             setHorizontalAlignment(LEFT);
         }
 
-        // Màu nền xen kẽ
+        // Màu nền và chữ
         if (!isSelected) {
             if (row % 2 == 0) {
                 cell.setBackground(new Color(245, 245, 245)); // Xám nhạt
             } else {
                 cell.setBackground(Color.WHITE);
             }
+            cell.setForeground(Color.BLACK); // Explicitly set foreground for unselected rows
         } else {
             cell.setBackground(new Color(0, 123, 255)); // Màu xanh khi chọn
-            cell.setForeground(Color.WHITE);
+            cell.setForeground(Color.WHITE); // Foreground for selected rows
         }
 
         // Font và padding

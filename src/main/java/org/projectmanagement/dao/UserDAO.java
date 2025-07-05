@@ -39,6 +39,7 @@ public class UserDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
+                // Lấy mật khẩu đã băm từ database
                 String hashedPassword = rs.getString("password");
 
                 // Dùng BCrypt để kiểm tra
@@ -103,10 +104,11 @@ public class UserDAO {
             }
         }
 
-        // Cập nhật mật khẩu mới
+// Băm mật khẩu mới bằng BCrypt với salt ngẫu nhiên
         String hashedNewPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
         sql = "UPDATE users SET password = ? WHERE user_id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+// Cập nhật mật khẩu đã băm vào database
             stmt.setString(1, hashedNewPassword);
             stmt.setInt(2, userId);
             int rowsAffected = stmt.executeUpdate();
@@ -205,26 +207,5 @@ public class UserDAO {
         }
     }
 
-    // Lấy danh sách tất cả người dùng
-    public List<User> findAll() throws SQLException {
-        List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM users";
-        try (Statement stmt = connection.createStatement()) {
-            ResultSet rs = stmt.executeQuery(sql);
-            while (rs.next()) {
-                users.add(new User(
-                        rs.getInt("user_id"),
-                        rs.getString("username"),
-                        rs.getString("password"),
-                        rs.getString("email"),
-                        rs.getString("role"),
-                        rs.getString("full_name"),
-                        rs.getString("avatar_path"),
-                        rs.getString("student_code"),
-                        rs.getString("phone_number")
-                ));
-            }
-        }
-        return users;
-    }
+
 }

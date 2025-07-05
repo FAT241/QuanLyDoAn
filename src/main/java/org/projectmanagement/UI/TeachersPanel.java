@@ -123,7 +123,13 @@ public class TeachersPanel extends JPanel {
         buttonPanel.add(btnDelete);
         add(buttonPanel, BorderLayout.SOUTH);
     }
-
+//Sử dụng SwingWorker để thực hiện truy vấn cơ sở dữ liệu trong luồng nền, tránh làm treo giao diện.
+//Trong doInBackground():
+//Gọi teacherDAO.findAll() để lấy toàn bộ danh sách giảng viên.
+//Sử dụng synchronized để đảm bảo thread-safety khi truy cập teacherDAO.
+//Trong done():
+//Lấy danh sách giảng viên và cập nhật bảng bằng updateTable().
+//Nếu có lỗi (InterruptedException hoặc ExecutionException), hiển thị thông báo lỗi qua JOptionPane.
     private void loadTeachersAsync() {
         SwingWorker<List<Teacher>, Void> worker = new SwingWorker<List<Teacher>, Void>() {
             @Override
@@ -145,7 +151,12 @@ public class TeachersPanel extends JPanel {
         };
         worker.execute();
     }
-
+//Lấy từ khóa từ txtSearch.getText().trim().
+//Nếu từ khóa trống, hiển thị thông báo yêu cầu nhập từ khóa.
+//Sử dụng SwingWorker để thực hiện tìm kiếm bất đồng bộ:
+//Trong doInBackground(): Gọi teacherDAO.searchByNameOrEmail(keyword) để tìm kiếm.
+//Trong done(): Cập nhật bảng với kết quả qua updateTable(). Nếu không tìm thấy giảng viên, hiển thị thông báo "Không tìm thấy giảng viên nào".
+//Xử lý lỗi tương tự loadTeachersAsync().
     private void searchTeachers() {
         String keyword = txtSearch.getText().trim();
         if (keyword.isEmpty()) {
@@ -284,7 +295,9 @@ public class TeachersPanel extends JPanel {
 
         dialog.setVisible(true);
     }
-
+//Kiểm tra xem người dùng đã chọn một hàng trong bảng chưa (teacherTable.getSelectedRow()).
+//Lấy teacherId từ hàng đã chọn và dùng teacherDAO.findById() để lấy thông tin giảng viên.
+//Tạo JDialog với các trường nhập liệu điền sẵn thông tin giảng viên.
     private void showEditTeacherDialog() {
         int selectedRow = teacherTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -384,7 +397,11 @@ public class TeachersPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+//Kiểm tra xem người dùng đã chọn một hàng trong bảng chưa.
+//Lấy teacherId từ hàng đã chọn.
+//Hiển thị hộp thoại xác nhận xóa (JOptionPane.YES_NO_OPTION).
+//Nếu xác nhận, gọi teacherDAO.deleteTeacher(teacherId) để xóa.
+//Cập nhật bảng bằng loadTeachersAsync() và hiển thị thông báo thành công hoặc lỗi.
     private void deleteSelectedTeacher() {
         int selectedRow = teacherTable.getSelectedRow();
         if (selectedRow == -1) {

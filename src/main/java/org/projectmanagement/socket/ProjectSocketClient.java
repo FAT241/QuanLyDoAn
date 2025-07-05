@@ -29,7 +29,7 @@ public class ProjectSocketClient {
     public ProjectSocketClient() {
         this.gson = new Gson();
     }
-
+// Phương thức connect để kết nối đến server
     public CompletableFuture<Boolean> connect(String userId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -56,7 +56,7 @@ public class ProjectSocketClient {
             }
         });
     }
-
+// Bắt đầu lắng nghe tin nhắn từ server
     private void startMessageListener() {
         Thread listenerThread = new Thread(() -> {
             try {
@@ -73,7 +73,8 @@ public class ProjectSocketClient {
         listenerThread.setDaemon(true);
         listenerThread.start();
     }
-
+// Phương thức xử lý tin nhắn từ server
+    // Đây là nơi nhận các thông báo, phản hồi upload/download, và lỗi từ server
     private void handleServerMessage(String message) {
         try {
             JsonObject response = gson.fromJson(message, JsonObject.class);
@@ -104,7 +105,8 @@ public class ProjectSocketClient {
             System.err.println("Lỗi xử lý tin nhắn từ server: " + e.getMessage());
         }
     }
-
+// Phương thức uploadFile để tải file lên server
+    // Đây là nơi gửi file từ client lên server, bao gồm việc đọc file, mã hóa base64 và gửi yêu cầu upload
     public CompletableFuture<UploadResult> uploadFile(String filePath, int projectId,
                                                       Consumer<Integer> progressCallback) {
         return CompletableFuture.supplyAsync(() -> {
@@ -144,7 +146,7 @@ public class ProjectSocketClient {
             }
         });
     }
-
+// Phương thức downloadFile để tải file từ server về
     public CompletableFuture<DownloadResult> downloadFile(String serverFilePath, String localFilePath,
                                                           Consumer<Integer> progressCallback) {
         return CompletableFuture.supplyAsync(() -> {
@@ -192,7 +194,8 @@ public class ProjectSocketClient {
 
         writer.println(gson.toJson(statusRequest));
     }
-
+// Phương thức xử lý phản hồi upload
+    // Đây là nơi nhận phản hồi từ server sau khi upload file, hiển thị thông báo thành công hoặc lỗi
     private void handleUploadResponse(JsonObject response) {
         String status = response.get("status").getAsString();
         String message = response.get("message").getAsString();

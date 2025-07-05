@@ -37,7 +37,8 @@ public class ProjectSocketServer {
         // Tạo thư mục upload nếu chưa tồn tại và kiểm tra quyền
         initializeUploadDirectory();
     }
-
+// Phương thức khởi tạo thư mục upload
+    //Kiểm tra quyền ghi vào thư mục upload trong initializeUploadDirectory().
     private void initializeUploadDirectory() {
         try {
             Path uploadPath = Paths.get(UPLOAD_DIR);
@@ -59,7 +60,7 @@ public class ProjectSocketServer {
             throw new RuntimeException("Không thể khởi tạo server do lỗi thư mục upload", e);
         }
     }
-
+// Phương thức khởi động server
     public void start() {
         try {
             serverSocket = new ServerSocket(PORT);
@@ -121,7 +122,9 @@ public class ProjectSocketServer {
         private BufferedReader reader;
         private PrintWriter writer;
         private String userId;
-
+//Sử dụng ExecutorService với Executors.newFixedThreadPool(10) để quản lý nhiều thread xử lý các kết nối client đồng thời.
+//Mỗi ClientHandler được chạy trong một thread riêng (qua threadPool.submit(clientHandler)), cho phép server xử lý nhiều client cùng lúc.
+//Thread listener trong start() để chấp nhận kết nối mới từ serverSocket.accept().
         public ClientHandler(Socket socket) {
             this.socket = socket;
             try {
@@ -145,7 +148,7 @@ public class ProjectSocketServer {
                 cleanup();
             }
         }
-
+// Xử lý các tin nhắn từ client
         private void handleClientMessage(String message) {
             try {
                 JsonObject request = gson.fromJson(message, JsonObject.class);
@@ -175,7 +178,7 @@ public class ProjectSocketServer {
                 e.printStackTrace(); // Log chi tiết lỗi
             }
         }
-
+// Xử lý kết nối từ client
         private void handleConnect(JsonObject request) {
             try {
                 if (!request.has("userId") || request.get("userId").isJsonNull()) {

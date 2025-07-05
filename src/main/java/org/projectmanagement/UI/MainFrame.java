@@ -26,6 +26,34 @@ public class MainFrame extends JFrame {
         initUI();
         setupWindowProperties();
     }
+    private class FadePanel extends JPanel {
+        private float alpha = 1.0f;
+        private JPanel contentPanel;
+
+        public FadePanel(JPanel content) {
+            super(new BorderLayout());
+            this.contentPanel = content;
+            setOpaque(false);
+            add(content, BorderLayout.CENTER);
+        }
+
+        public void setAlpha(float alpha) {
+            this.alpha = Math.max(0.0f, Math.min(1.0f, alpha)); // Clamp to valid range
+            repaint();
+        }
+
+        public float getAlpha() {
+            return alpha;
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+            super.paintComponent(g2d);
+            g2d.dispose();
+        }
+    }
 
     private void initUI() {
         setTitle("Project Management System - VKU");
@@ -117,47 +145,58 @@ public class MainFrame extends JFrame {
     }
 
     private void switchPanelWithTransition(JPanel newPanel) {
-        // Create fade transition effect using component alpha
-        Timer fadeOut = new Timer(10, null);
-        Timer fadeIn = new Timer(10, null);
+        // Get current panel
+        Component currentComponent = mainContainer.getComponent(0);
 
-        final float[] alpha = {1.0f};
+        // Create fade panels
+        FadePanel fadeOutPanel = new FadePanel((JPanel) ((JPanel) currentComponent).getComponent(0));
+        FadePanel fadeInPanel = new FadePanel(newPanel);
+        fadeInPanel.setAlpha(0.0f);
 
-        fadeOut.addActionListener(e -> {
-            alpha[0] -= 0.05f;
-            if (alpha[0] <= 0) {
-                fadeOut.stop();
+        // Setup transition
+        Timer transitionTimer = new Timer(20, null);
+        final int[] step = {0};
+        final int totalSteps = 20;
 
-                // Switch panel
+        transitionTimer.addActionListener(e -> {
+            step[0]++;
+            float progress = (float) step[0] / totalSteps;
+
+            // Fade out current panel
+            fadeOutPanel.setAlpha(1.0f - progress);
+
+            // Fade in new panel
+            fadeInPanel.setAlpha(progress);
+
+            if (step[0] >= totalSteps) {
+                transitionTimer.stop();
+                // Final cleanup - replace with the actual new panel without fade wrapper
                 mainContainer.removeAll();
                 mainContainer.add(createTransitionPanel(newPanel), BorderLayout.CENTER);
                 mainContainer.revalidate();
-
-                // Start fade in
-                fadeIn.start();
+                mainContainer.repaint();
             }
-            // Use AlphaComposite for transparency effect instead of setOpacity
-            Graphics2D g2d = (Graphics2D) mainContainer.getGraphics();
-            if (g2d != null) {
-                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha[0]));
-            }
-            mainContainer.repaint();
         });
 
-        fadeIn.addActionListener(e -> {
-            alpha[0] += 0.05f;
-            if (alpha[0] >= 1.0f) {
-                fadeIn.stop();
-                alpha[0] = 1.0f;
-            }
-            Graphics2D g2d = (Graphics2D) mainContainer.getGraphics();
-            if (g2d != null) {
-                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha[0]));
-            }
-            mainContainer.repaint();
-        });
+        // Start transition
+        mainContainer.removeAll();
 
-        fadeOut.start();
+        // Create layered panel for transition
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.setPreferredSize(mainContainer.getSize());
+
+        // Add both panels to the layered pane
+        fadeOutPanel.setBounds(0, 0, mainContainer.getWidth(), mainContainer.getHeight());
+        fadeInPanel.setBounds(0, 0, mainContainer.getWidth(), mainContainer.getHeight());
+
+        layeredPane.add(fadeOutPanel, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(fadeInPanel, JLayeredPane.PALETTE_LAYER);
+
+        mainContainer.add(layeredPane, BorderLayout.CENTER);
+        mainContainer.revalidate();
+        mainContainer.repaint();
+
+        transitionTimer.start();
     }
 
     private void onLoginSuccess(User user) {
